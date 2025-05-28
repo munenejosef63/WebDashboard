@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Upload File{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h3 class="mb-0">Upload Excel/CSV File</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" action="{{ url_for('main.upload') }}">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Select file to upload</label>
+                            <input class="form-control" type="file" id="file" name="file" accept=".xlsx,.xls,.csv" required>
+                            <div class="form-text"> Supported file formats: Excel (.xlsx, .xls) or CSV (.csv).</div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Upload</button>
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow mt-4">
+                <div class="card-header">
+                    <h4 class="mb-0">File Format Requirements</h4>
+                </div>
+                <div class="card-body">
+                    <p>Your Excel/CSV file must contain the following columns:</p>
+                    <ul>
+                        <li><strong>Title</strong> - The title of the dashboard item</li>
+                        <li><strong>Link</strong> - The URL the item should link to</li>
+                        <li><strong>Status</strong> (optional) - Set to "Urgent" to highlight the item</li>
+                        <li><strong>Section</strong> - Should be one of: Administrative, Academics, Innovation</li>
+                    </ul>
+                    <p>Example:</p>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Link</th>
+                                <th>Status</th>
+                                <th>Section</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Student Portal</td>
+                                <td>https://portal.example.com</td>
+                                <td></td>
+                                <td>Academics</td>
+                            </tr>
+                            <tr>
+                                <td>Emergency Contacts</td>
+                                <td>https://contacts.example.com</td>
+                                <td>Urgent</td>
+                                <td>Administrative</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

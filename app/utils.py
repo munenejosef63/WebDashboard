@@ -7,6 +7,11 @@ import logging
 from datetime import datetime
 from typing import Dict, List
 
+
+def normalize_column_name(col: str) -> str:
+    """Normalize column names: strip whitespace, lower, replace spaces and underscores."""
+    return col.strip().lower().replace(' ', '_').replace('-', '_')
+
 # Initialize logger
 logger = logging.getLogger(__name__)
 
@@ -20,16 +25,6 @@ REQUIRED_COLUMNS = {'title', 'link', 'status'}
 
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def normalize_column_name(column_name: str) -> str:
-    return (
-        column_name.strip()
-        .lower()
-        .replace(' ', '_')
-        .replace(':', '_')
-        .replace('-', '_')
-    )
 
 
 def process_uploaded_file(file_path: str, user_id: int) -> str:
@@ -175,9 +170,7 @@ def update_progress(user_id: int, processed: int, total: int, sheet_name: str):
 
 
 def process_sheet(spreadsheet_id: int, sheet_name: str, sheet_df: pd.DataFrame):
-    """Process individual sheet and its links with robust error handling and diagnostics."""
     try:
-        # Validate input parameters
         if not spreadsheet_id or not isinstance(spreadsheet_id, int):
             raise ValueError(f"Invalid spreadsheet ID: {spreadsheet_id}")
         if not sheet_name or not isinstance(sheet_name, str):
@@ -188,80 +181,39 @@ def process_sheet(spreadsheet_id: int, sheet_name: str, sheet_df: pd.DataFrame):
         logger.info(f"Processing sheet: {sheet_name} for spreadsheet {spreadsheet_id}")
         logger.debug(f"Initial data sample:\n{sheet_df.head(2)}")
 
-        # Create sheet record
         sheet = Sheet(name=sheet_name, spreadsheet_id=spreadsheet_id)
         db.session.add(sheet)
-        db.session.flush()
-        logger.debug(f"Created sheet ID: {sheet.id}")
+        db.session.flush()  # Ensure sheet.id is available
 
         if sheet_df.empty:
             logger.warning(f"Empty sheet detected: {sheet_name}")
             return
 
-        # Clean and validate data
         sheet_df = clean_sheet_data(sheet_df)
         if sheet_df.empty:
             logger.warning(f"Sheet {sheet_name} empty after cleaning")
             return
 
-        # Validate required columns
         required_columns = {'title', 'link'}
         missing_cols = required_columns - set(sheet_df.columns)
         if missing_cols:
             raise ValueError(f"Missing columns in {sheet_name}: {missing_cols}")
 
-        # Insert links with transaction safety
-        try:
-            logger.info(f"Inserting {len(sheet_df)} links for sheet {sheet.id}")
+        logger.info(f"Inserting {len(sheet_df)} links for sheet {sheet.id}")
 
-            # Batch insert with progress tracking
-            batch_size = 100
-            for i in range(0, len(sheet_df), batch_size):
-                batch = sheet_df.iloc[i:i + batch_size]
-                links = [
-                    Link(
-                        sheet_id=sheet.id,
-                        title=row['title'],
-                        link=row['link'],
-                        status=row.get('status', 'unknown')
-                    ) for _, row in batch.iterrows()
-                ]
+        links = [
+            Link(
+                sheet_id=sheet.id,
+                title=row['title'],
+                link=row['link'],
+                status=row.get('status', 'unknown')
+            ) for _, row in sheet_df.iterrows()
+        ]
+        db.session.add_all(links)
+        logger.debug(f"Added {len(links)} links for sheet {sheet.id}")
 
-                db.session.bulk_save_objects(links)
-                logger.debug(f"Inserted batch {i // batch_size + 1} with {len(links)} links")
-
-                # Commit progress periodically
-                if i % 500 == 0:
-                    db.session.commit()
-                    logger.debug("Intermediate commit performed")
-
-            # Final commit for remaining records
-            db.session.commit()
-            logger.info(f"Successfully inserted {len(sheet_df)} links for sheet {sheet.id}")
-
-        except KeyError as ke:
-            logger.error(f"Missing column in sheet {sheet_name}: {str(ke)}")
-            raise ValueError(f"Invalid data structure: {str(ke)}") from ke
-        except SQLAlchemyError as sae:
-            logger.error(f"Database error inserting links: {str(sae)}")
-            raise
-        except Exception as e:
-            logger.error(f"Unexpected error during link insertion: {str(e)}")
-            raise
-
-        # Log sample inserted data
-        logger.debug(f"First link example: {links[0].__dict__}") if links else None
-
-    except ValueError as ve:
-        logger.error(f"Validation failed for sheet {sheet_name}: {str(ve)}")
-        raise
-    except SQLAlchemyError as sae:
-        logger.error(f"Database error processing sheet {sheet_name}: {str(sae)}")
-        db.session.rollback()
-        raise
     except Exception as e:
-        logger.error(f"Critical error processing sheet {sheet_name}: {str(e)}", exc_info=True)
-        db.session.rollback()
+        logger.error(f"Error processing sheet {sheet_name}: {e}", exc_info=True)
         raise
 
 def clean_sheet_data(sheet_df: pd.DataFrame) -> pd.DataFrame:
