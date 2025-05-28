@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="container-fluid">
+    <!-- Hidden data URLs -->
+    <div id="app-urls"
+         data-upload-url="{{ url_for('main.upload_file') }}"
+         data-status-url="{{ url_for('main.get_status_options') }}"
+         data-create-section-url="{{ url_for('main.create_section') }}"
+         data-get-sections-url="{{ url_for('main.get_sections') }}"
+         data-get-stats-url="{{ url_for('main.get_stats') }}"
+         style="display: none;">
+    </div>
+
+    <!-- Main Dashboard Header -->
+    <div class="dashboard-header-container">
+        <div class="dashboard-header">
+            <h1><i class="bi bi-speedometer2 me-2"></i>Main Dashboard</h1>
+        </div>
+        <div class="logout-container">
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary logout-btn">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-layout">
+        <!-- Left Sidebar - Sections & Stats -->
+        <div class="sidebar left-sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h2 class="sidebar-title">📁 Dashboard Sections</h2>
+                </div>
+                <div class="sidebar-card-body">
+                    <div class="horizontal-section-list">
+                        {% include '_sections.html' %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h2 class="sidebar-title">📊 Quick Stats</h2>
+                </div>
+                <div class="sidebar-card-body">
+                    <div class="stats-container">
+                        <div class="stat-row">
+                            <div class="stat-icon-wrapper bg-primary">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Total Files</span>
+                                <span class="stat-value">{{ total_files }}</span>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-icon-wrapper bg-success">
+                                <i class="bi bi-collection"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Total Sections</span>
+                                <span class="stat-value">{{ total_sections }}</span>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-icon-wrapper bg-info">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Last Upload</span>
+                                <span class="stat-value">
+                                    {{ last_upload.strftime('%m/%d/%Y') if last_upload else 'N/A' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- File Upload Section -->
+            <div class="form-card upload-container">
+                <div class="card-header">
+                    <h3><i class="bi bi-upload me-2"></i>Upload New File</h3>
+                </div>
+                <div class="card-body">
+                     <form id="uploadForm" enctype="multipart/form-data">
+                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="file"
+                           class="form-control"
+                           id="fileInput"
+                           name="file"
+                           accept=".csv, .xls, .xlsx"
+                           required>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload me-1"></i> Upload
+                    </button>
+                </div>
+                <div class="form-text">
+                    Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
+                </div>
+            </div>
+        </form>
+                    <!-- Upload Progress -->
+                    <div id="upload-progress-container" class="mt-3" style="display: none;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span id="upload-status">Status: Preparing upload...</span>
+                            <span id="upload-percentage">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div id="upload-progress" class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Creation Form -->
+            <div class="form-card section-creation-container mt-4">
+                <div class="card-header">
+                    <h3><i class="bi bi-folder-plus me-2"></i>Create New Section</h3>
+                </div>
+                <div class="card-body">
+                    <form id="createSectionForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="spreadsheetSelect" class="form-label">Select Spreadsheet</label>
+                                <select class="form-select" id="spreadsheetSelect" required>
+                                    <option value="" disabled selected>Choose spreadsheet...</option>
+                                    {% for spreadsheet in spreadsheets %}
+                                        <option value="{{ spreadsheet.id }}">{{ spreadsheet.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="newSectionName" class="form-label">Section Name</label>
+                                <input type="text" class="form-control" id="newSectionName"
+                                       placeholder="Enter section name" required>
+                                <div id="section-name-error" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-plus-circle me-2"></i>Create Section
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+<style>
+    :root {
+        --sidebar-width: 30%;
+        --main-width: 40%;
+        --gap-size: 20px;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+    }
+
+    .dashboard-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .dashboard-header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.2rem;
+        font-weight: 600;
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    .logout-btn {
+        font-size: 18px;
+        padding: 0.5rem 1rem;
+    }
+
+    .dashboard-layout {
+        display: grid;
+        grid-template-columns: var(--sidebar-width) var(--main-width) var(--sidebar-width);
+        gap: var(--gap-size);
+        width: 100%;
+    }
+
+    .sidebar {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eaeaea;
+    }
+
+    .sidebar-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .sidebar-card-header {
+        margin-bottom: 1rem;
+    }
+
+    .sidebar-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: #34495e;
+        margin: 0 0 15px 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .horizontal-section-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 0;
+    }
+
+    .section-pill {
+        display: inline-block;
+        padding: 8px 12px;
+        background: #1677FF;
+        border-radius: 20px;
+        color: #FFFFFF;
+        text-decoration: none;
+        font-size: 20px;
+        transition: all 0.2s ease;
+        border: 1px solid #e2e8f0;
+        margin: 2px;
+    }
+/* For better mobile display */
+@media (max-width: 768px) {
+    .section-pill {
+        font-size: 20px;
+        padding: 10px 20px;
+        margin: 1px;
+    }
+}
+
+@media (max-width: 576px) {
+    .section-pill {
+        font-size: 18px;
+        padding: 6px 12px;
+        margin: 1px;
+    }
+}
+    .section-pill:hover {
+        background: #e2e8f0;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .stats-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        padding: 1rem 0;
+    }
+
+    .stat-row {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: transform 0.2s ease;
+    }
+
+    .stat-row:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-right: 1.2rem;
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-label {
+        font-size: 0.95rem;
+        color: #64748b;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-top: 0.2rem;
+    }
+
+    .bg-primary { background: #3b82f6; }
+    .bg-success { background: #10b981; }
+    .bg-info { background: #06b6d4; }
+
+    .stat-row:last-child .stat-value {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #475569;
+    }
+
+    .main-content {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eaeaea;
+    }
+
+    .form-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header h3 {
+        font-size: 24px;
+        font-weight: 500;
+        color: #34495e;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #334155;
+        margin-bottom: 0.5rem;
+        font-size: 18px;
+    }
+
+    .form-control, .form-select {
+        padding: 0.6rem 0.75rem;
+        font-size: 18px;
+    }
+
+    .image-container {
+        margin-top: 1.5rem;
+    }
+
+    .dashboard-image {
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eaeaea;
+    }
+
+    #upload-success-message {
+        font-weight: 500;
+        font-size: 1.1rem;
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @media (max-width: 1200px) {
+        .dashboard-layout {
+            grid-template-columns: 30% 38% 32%;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .dashboard-layout {
+            grid-template-columns: 1fr;
+        }
+        .sidebar {
+            margin-bottom: 1.5rem;
+        }
+        .dashboard-header h1 {
+            font-size: 18px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1.5rem;
+        }
+        .stat-row {
+            padding: 0.8rem;
+        }
+        .stat-icon-wrapper {
+            width: 45px;
+            height: 45px;
+            font-size: 1.2rem;
+        }
+        .stat-value {
+            font-size: 1.2rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+        .dashboard-header-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+
+    /* Add custom styles */
+.section-creation-container {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+}
+
+.section-creation-container .card-header {
+    background: linear-gradient(135deg, #6c5ce7, #a8a4e6);
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+#spreadsheetSelect option {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+#spreadsheetSelect option:last-child {
+    border-bottom: none;
+}
+
+    .invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,10 @@
+<div class="horizontal-section-list">
+    {% for section in sections %}
+    <a href="{{ url_for('main.dashboard_section', section_name=section.name) }}"
+       class="section-pill {% if current_section and section.id == current_section.id %}active{% endif %}"
+       target="_blank"
+       rel="noopener noreferrer">
+        {{ section.name }}
+    </a>
+    {% endfor %}
+</div>

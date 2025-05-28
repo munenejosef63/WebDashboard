@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ current_section.name }} Dashboard</title>
+    <style>
+        /* Previous styles remain unchanged */
+        /* Added dashboard layout styles */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .add-link-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section-labels a.active {
+            background-color: #007bff;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Section Navigation -->
+    <div class="section-labels">
+        {% for section in sections %}
+            <a href="{{ url_for('main.dashboard_section', section_name=section.name) }}"
+               class="section-link {% if section.id == current_section.id %}active{% endif %}">
+                {{ section.name }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <div class="container mt-5">
+        <h1>{{ current_section.name }} Dashboard</h1>
+
+        <div class="dashboard-container">
+            <!-- Left Column - Add Link Section -->
+            <div class="add-link-section">
+                <h3>Add New Link</h3>
+                <form id="addLinkForm">
+                    <input type="hidden" name="section_id" value="{{ current_section.id }}">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="title" placeholder="Link Title" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="url" class="form-control" name="url" placeholder="https://example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" name="status">
+                            <option value="static">Static</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Link</button>
+                </form>
+            </div>
+
+            <!-- Right Column - Links Display -->
+            <div class="links-container">
+                {% if data %}
+                    <div class="button-container">
+                        {% for row in data %}
+                        <a href="{{ row.url }}"
+                           class="btn btn-{{ row.status }}"
+                           target="_blank">
+                            {{ row.title }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No links found in this section.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript remains the same
+        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                section_id: e.target.section_id.value,
+                title: e.target.title.value,
+                url: e.target.url.value,
+                status: e.target.status.value
+            };
+
+            try {
+                const response = await fetch('/add_link', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
