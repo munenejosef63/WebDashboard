@@ -89,25 +89,25 @@
                     <h3><i class="bi bi-upload me-2"></i>Upload New File</h3>
                 </div>
                 <div class="card-body">
-                     <form id="uploadForm" enctype="multipart/form-data">
-                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="mb-3">
-                <div class="input-group">
-                    <input type="file"
-                           class="form-control"
-                           id="fileInput"
-                           name="file"
-                           accept=".csv, .xls, .xlsx"
-                           required>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-upload me-1"></i> Upload
-                    </button>
-                </div>
-                <div class="form-text">
-                    Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
-                </div>
-            </div>
-        </form>
+                     <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="mb-3">
+        <div class="input-group">
+            <input type="file"
+                   class="form-control"
+                   id="fileInput"
+                   name="file"
+                   accept=".csv, .xls, .xlsx"
+                   required>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-upload me-1"></i> Upload
+            </button>
+        </div>
+        <div class="form-text">
+            Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
+        </div>
+    </div>
+</form>
                     <!-- Upload Progress -->
                     <div id="upload-progress-container" class="mt-3" style="display: none;">
                         <div class="d-flex justify-content-between mb-2">

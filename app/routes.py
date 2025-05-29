@@ -1,58 +1,76 @@
 import os
 import logging
+import uuid
 from flask import Blueprint, render_template, request, flash, current_app, jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
+from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 from datetime import datetime
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import validate_csrf
 from app.models import Spreadsheet, Sheet, Link, db, get_quick_stats
 from .utils import allowed_file, process_uploaded_file
 
-# Initialize logger
-logging.basicConfig(level=logging.INFO)
+# Configure detailed logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('app_debug.log')
+    ]
+)
 logger = logging.getLogger(__name__)
 
-# Create a blueprint for the main routes
+# Create blueprint
 main_bp = Blueprint('main', __name__)
 
+UPLOAD_PROGRESS = {}  # Global state for upload tracking
 
-UPLOAD_PROGRESS = {}  # Optional global state to track upload progress (if needed)
 
 @main_bp.route('/')
 def index():
-    """
-    Redirect the user to the appropriate page based on authentication status.
-    """
+    """Redirect based on authentication status"""
+    logger.debug(f"Index route accessed. User authenticated: {current_user.is_authenticated}")
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
     return redirect(url_for('auth.login'))
 
+
 @main_bp.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    """
-    Render the user dashboard with spreadsheets, sections, and statistics.
-    """
+    """Dashboard with enhanced logging and database verification"""
     try:
+        logger.info(f"Loading dashboard for user: {current_user.id}")
+
+        # Query user spreadsheets with relationships
         user_spreadsheets = (
             db.session.query(Spreadsheet)
             .options(joinedload(Spreadsheet.sheets))
             .filter_by(user_id=current_user.id)
             .all()
         )
+        logger.debug(f"Found {len(user_spreadsheets)} spreadsheets for user")
 
-        # Calculate sections excluding credentials sheets
+        # Process sections excluding credentials
         sections = [
             sheet
             for spreadsheet in user_spreadsheets
             for sheet in spreadsheet.sheets
-            if sheet.name.lower() != 'credentials'
+            # if sheet.name.lower() != 'credentials'
         ]
+        logger.debug(f"Identified {len(sections)} valid sections")
 
-        # Get quick stats
+        # Get and verify stats
         stats = get_quick_stats(current_user.id)
+        logger.info(
+            f"Dashboard stats - Files: {stats['total_files']}, Sections: {stats['total_sections']}, Last Upload: {stats['last_upload']}")
+
+        # Verify data consistency
+        if stats['total_files'] != len(user_spreadsheets):
+            logger.warning(f"Stat file count mismatch: {stats['total_files']} vs {len(user_spreadsheets)}")
 
         return render_template(
             'dashboard.html',
@@ -64,129 +82,145 @@ def dashboard():
         )
 
     except SQLAlchemyError as e:
-        logger.error(f"Database error loading dashboard: {str(e)}")
+        logger.critical(f"DATABASE ERROR: {str(e)}", exc_info=True)
         flash("Failed to load dashboard data from database", "danger")
         return redirect(url_for('auth.login'))
-
     except Exception as e:
-        logger.error(f"Unexpected dashboard error: {str(e)}", exc_info=True)
-        flash("An unexpected error occurred while loading the dashboard", "danger")
+        logger.critical(f"UNEXPECTED ERROR: {str(e)}", exc_info=True)
+        flash("System error loading dashboard", "danger")
         return redirect(url_for('auth.login'))
 
 
 @main_bp.route('/upload', methods=['POST'])
 @login_required
 def upload_file():
-    """Handles file upload with enhanced error diagnostics and transaction management."""
+    """File upload handler with detailed transaction logging"""
     file_path = None
     try:
-        # ==== File Reception Validation ====
+        # Validate CSRF token
+        validate_csrf(request.form.get('csrf_token'))
+        logger.debug("CSRF token validated successfully")
+
+        # File existence check
         if 'file' not in request.files:
-            logger.error("Upload error: No file part in request")
+            logger.error("Upload request missing 'file' part")
             return jsonify({
                 "status": "error",
-                "message": "No file selected for upload.",
+                "message": "No file selected",
                 "error_code": "NO_FILE_PART"
             }), 400
 
         file = request.files['file']
 
-        # ==== Empty File Check ====
+        # Empty file check
         if not file or file.filename == '':
-            logger.error("Upload error: Empty file submission")
+            logger.error("Empty file submission detected")
             return jsonify({
                 "status": "error",
-                "message": "Empty file submission.",
+                "message": "Empty file submission",
                 "error_code": "EMPTY_FILE"
             }), 400
 
-        # ==== File Size Validation ====
+        # File size validation
         try:
             file.seek(0, os.SEEK_END)
             file_length = file.tell()
             file.seek(0)
-            logger.info(f"File upload initiated: {file.filename} ({file_length} bytes)")
+            logger.debug(f"File '{file.filename}' size: {file_length} bytes")
 
             if file_length > current_app.config['MAX_CONTENT_LENGTH']:
-                logger.error(f"File size exceeded: {file_length} bytes")
+                logger.error(f"File size {file_length} exceeds limit {current_app.config['MAX_CONTENT_LENGTH']}")
                 return jsonify({
                     "status": "error",
-                    "message": "File size exceeds maximum allowed limit.",
-                    "max_size": f"{current_app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024)}MB",
+                    "message": "File size exceeds limit",
                     "error_code": "FILE_TOO_LARGE"
                 }), 413
         except OSError as e:
             logger.error(f"File size check failed: {str(e)}")
             return jsonify({
                 "status": "error",
-                "message": "Invalid file content.",
+                "message": "Invalid file content",
                 "error_code": "INVALID_FILE_CONTENT"
             }), 400
 
-        # ==== File Type Validation ====
+        # File type validation
         if not allowed_file(file.filename):
             logger.error(f"Invalid file type: {file.filename}")
             return jsonify({
                 "status": "error",
-                "message": "Invalid file format.",
-                "allowed_formats": current_app.config['ALLOWED_EXTENSIONS'],
+                "message": "Invalid file format",
                 "error_code": "INVALID_FILE_TYPE"
             }), 400
 
-        # ==== Secure File Storage ====
+        # Secure file storage
         upload_folder = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
         filename = secure_filename(file.filename)
         file_path = os.path.join(upload_folder, filename)
+        logger.debug(f"Saving file to temporary location: {file_path}")
 
         try:
             file.save(file_path)
-            logger.debug(f"Temporary file stored: {file_path}")
             if not os.path.exists(file_path):
+                logger.critical("File save verification failed - file not found")
                 raise RuntimeError("File save verification failed")
+            logger.info("File saved successfully to temporary storage")
         except Exception as e:
             logger.error(f"File save failed: {str(e)}")
             return jsonify({
                 "status": "error",
-                "message": "Failed to store temporary file.",
+                "message": "Failed to store file",
                 "error_code": "FILE_STORAGE_FAILURE"
             }), 500
 
-        # ==== Database Health Check ====
+        # Database health check
         try:
             db.session.execute(text("SELECT 1"))
             logger.debug("Database connection verified")
         except SQLAlchemyError as e:
-            logger.critical(f"Database connection failed: {str(e)}")
+            logger.critical(f"Database health check failed: {str(e)}")
             return jsonify({
                 "status": "error",
-                "message": "Database unavailable.",
+                "message": "Database unavailable",
                 "error_code": "DB_CONNECTION_FAILURE"
             }), 503
 
-        # ==== Transaction Management ====
+        # Transaction management
         try:
-            logger.info("Initiating database transaction")
+            logger.info("Starting database transaction")
             db.session.begin_nested()
 
-            # ==== Existing Data Cleanup ====
-            logger.debug(f"Checking for existing spreadsheets: {filename}")
+            # Remove existing entries
             deleted_count = Spreadsheet.query.filter_by(
                 user_id=current_user.id,
                 name=filename
             ).delete(synchronize_session=False)
-            logger.info(f"Removed {deleted_count} existing spreadsheet entries")
+            logger.info(f"Deleted {deleted_count} existing spreadsheet entries")
 
-            # ==== File Processing ====
-            logger.info("Starting file processing pipeline")
+            # Process file
+            logger.debug(f"Processing file: {file_path}")
             status = process_uploaded_file(file_path, current_user.id)
+            logger.info(f"File processing completed with status: {status}")
+
+            # Commit transaction
             db.session.commit()
-            logger.info(f"Transaction committed successfully: {status}")
+            logger.info("Database transaction committed successfully")
+
+            # Verify database update
+            new_spreadsheet = Spreadsheet.query.filter_by(
+                user_id=current_user.id,
+                name=filename
+            ).first()
+
+            if not new_spreadsheet:
+                logger.critical("DATABASE UPDATE VERIFICATION FAILED: Spreadsheet not found after upload")
+                raise RuntimeError("Spreadsheet creation verification failed")
+
+            logger.info(f"Spreadsheet created successfully. ID: {new_spreadsheet.id}")
 
             return jsonify({
                 "status": "success",
-                "message": "File processed successfully" if status == "uploaded"
-                else "File updated successfully",
+                "message": "File processed successfully",
                 "filename": filename,
                 "redirect": url_for('main.dashboard'),
                 "stats": get_quick_stats(current_user.id)
@@ -194,98 +228,77 @@ def upload_file():
 
         except ValueError as ve:
             db.session.rollback()
-            logger.warning(f"Validation failed: {str(ve)}")
+            logger.error(f"Validation error: {str(ve)}")
             return jsonify({
                 "status": "error",
                 "message": "File validation failed",
-                "details": str(ve).split('\n'),
-                "template_url": url_for('static', filename='template.xlsx'),
+                "details": str(ve),
                 "error_code": "VALIDATION_FAILURE"
             }), 400
 
         except SQLAlchemyError as sae:
             db.session.rollback()
-            logger.error(f"Database error: {str(sae)}", exc_info=True)
+            logger.critical(f"Database error: {str(sae)}", exc_info=True)
             return jsonify({
                 "status": "error",
-                "message": "Data storage failure.",
-                "error_code": "DB_SAVE_FAILURE",
-                "database_error": str(sae.orig) if sae.orig else str(sae)
+                "message": "Database operation failed",
+                "error_code": "DB_SAVE_FAILURE"
             }), 500
 
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Unexpected processing error: {str(e)}", exc_info=True)
+            logger.critical(f"Processing error: {str(e)}", exc_info=True)
             raise
 
     except Exception as e:
-        logger.critical(f"Critical upload failure: {str(e)}", exc_info=True)
+        logger.critical(f"UPLOAD PROCESS FAILURE: {str(e)}", exc_info=True)
         return jsonify({
             "status": "error",
-            "message": "System error. Contact support if problem persists.",
+            "message": "System error during upload",
             "error_code": "SYSTEM_FAILURE",
-            "reference_id": str(uuid.uuid4())  # For support tracking
+            "reference_id": str(uuid.uuid4())
         }), 500
 
     finally:
-        # ==== Resource Cleanup ====
+        # Cleanup temporary file
         if file_path and os.path.exists(file_path):
             try:
                 os.remove(file_path)
-                logger.debug(f"Temporary file cleaned: {file_path}")
-            except Exception as cleanup_error:
-                logger.error(
-                    f"File cleanup failed for {file_path}: {str(cleanup_error)}",
-                    exc_info=True
-                )
+                logger.debug(f"Temporary file removed: {file_path}")
+            except Exception as e:
+                logger.error(f"Cleanup error: {str(e)}")
+
 
 @main_bp.route('/upload/progress', methods=['GET'])
 @login_required
 def upload_progress():
-    """
-    Provides detailed upload progress information including:
-    - Overall progress percentage
-    - Current processing stage
-    - Active sheet being processed
-    """
+    """Upload progress tracker with detailed logging"""
     try:
+        logger.debug(f"Upload progress requested for user: {current_user.id}")
         progress_data = UPLOAD_PROGRESS.get(current_user.id, {
             "progress": 0,
             "status": "Not started",
             "current_sheet": "",
             "timestamp": datetime.utcnow().isoformat()
         })
-
-        # Ensure minimum data structure format
-        response_data = {
-            "progress": progress_data.get("progress", 0),
-            "status": f"{progress_data.get('status', '')}".strip(),
-            "current_sheet": progress_data.get("current_sheet", ""),
-            "last_update": progress_data.get("timestamp", datetime.utcnow().isoformat())
-        }
-
-        # Clean up combined status if sheet name is empty
-        if not response_data["current_sheet"]:
-            response_data["status"] = response_data["status"].split("-")[0].strip()
-
-        return jsonify(response_data), 200
-
+        logger.debug(f"Returning progress data: {progress_data}")
+        return jsonify(progress_data), 200
     except Exception as e:
         logger.error(f"Progress check failed: {str(e)}", exc_info=True)
         return jsonify({
             "progress": 0,
             "status": "Error retrieving progress",
-            "current_sheet": "",
             "error": str(e)
         }), 500
 
 
-# Change existing section_details route to dashboard_section
 @main_bp.route('/dashboard/<section_name>')
 @login_required
 def dashboard_section(section_name):
-    """Show dashboard for a specific section with proper user isolation."""
+    """Section dashboard with access control and verification"""
     try:
+        logger.info(f"Loading section: {section_name} for user: {current_user.id}")
+
         # Get current section with user validation
         current_section = Sheet.query \
             .join(Spreadsheet) \
@@ -294,7 +307,13 @@ def dashboard_section(section_name):
             Spreadsheet.user_id == current_user.id
         ) \
             .options(joinedload(Sheet.links)) \
-            .first_or_404()
+            .first()
+
+        if not current_section:
+            logger.warning(f"Section not found: {section_name}")
+            return render_template('404.html'), 404
+
+        logger.debug(f"Section found: ID {current_section.id}")
 
         # Get all user sections for navigation
         user_spreadsheets = Spreadsheet.query \
@@ -308,43 +327,61 @@ def dashboard_section(section_name):
             for sheet in spreadsheet.sheets
             if sheet.name.lower() != 'credentials'
         ]
+        logger.debug(f"Found {len(sections)} sections for navigation")
 
         # Prepare links data
+        links = current_section.links
+        logger.info(f"Section contains {len(links)} links")
         data = [{
             'title': link.title,
             'url': link.link,
-            'status': (link.status or 'unknown').lower()
-        } for link in current_section.links]
+            'status': link.status or 'unknown'
+        } for link in links]
+
+        # Calculate stats
+        last_upload = max(
+            [s.created_at for s in user_spreadsheets],
+            default=datetime.utcnow()
+        )
+        logger.debug(f"Last upload: {last_upload}")
 
         return render_template(
             'section_dashboard.html',
             current_section=current_section,
             sections=sections,
             data=data,
-            # Pass stats for header display
             total_files=len(user_spreadsheets),
             total_sections=len(sections),
-            last_upload=max(
-                [s.created_at for s in user_spreadsheets],
-                default=datetime.utcnow()
-            )
+            last_upload=last_upload
         )
 
     except SQLAlchemyError as e:
-        logger.error(f"Database error in section dashboard: {str(e)}")
-        flash("Failed to load section data", "danger")
+        logger.error(f"Database error loading section: {str(e)}", exc_info=True)
+        flash("Database error loading section", "danger")
+        return redirect(url_for('main.dashboard'))
+    except Exception as e:
+        logger.error(f"Unexpected error in section dashboard: {str(e)}", exc_info=True)
+        flash("System error loading section", "danger")
         return redirect(url_for('main.dashboard'))
 
-    except Exception as e:
-        logger.error(f"Unexpected section dashboard error: {str(e)}")
-        flash("An unexpected error occurred", "danger")
-        return redirect(url_for('main.dashboard'))
 
 @main_bp.route('/add_link', methods=['POST'])
 @login_required
 def add_link():
+    """Link creation with transaction verification"""
     try:
         data = request.get_json()
+        logger.debug(f"Add link request data: {data}")
+
+        # Validate input
+        if not all(key in data for key in ['section_id', 'title', 'url', 'status']):
+            logger.error("Missing required fields in link creation")
+            return jsonify({
+                "status": "error",
+                "message": "Missing required fields"
+            }), 400
+
+        # Create and save link
         new_link = Link(
             sheet_id=data['section_id'],
             title=data['title'],
@@ -353,26 +390,48 @@ def add_link():
         )
         db.session.add(new_link)
         db.session.commit()
+        logger.info(f"Link created successfully. ID: {new_link.id}")
+
+        # Verify database entry
+        db_link = Link.query.get(new_link.id)
+        if not db_link:
+            logger.critical("LINK CREATION VERIFICATION FAILED: Record not found")
+            raise RuntimeError("Link creation verification failed")
+
+        logger.debug(f"Link verified in database: ID {db_link.id}")
 
         return jsonify({
             "status": "success",
             "link": {
-                "title": new_link.title,
-                "url": new_link.link,
-                "status": new_link.status
+                "title": db_link.title,
+                "url": db_link.link,
+                "status": db_link.status
             }
         }), 200
 
-    except Exception as e:
-        logger.error(f"Link creation error: {str(e)}")
+    except SQLAlchemyError as e:
+        logger.error(f"Database error creating link: {str(e)}", exc_info=True)
         db.session.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({
+            "status": "error",
+            "message": "Database operation failed"
+        }), 500
+    except Exception as e:
+        logger.error(f"Unexpected error creating link: {str(e)}", exc_info=True)
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "message": "System error creating link"
+        }), 500
+
 
 @main_bp.route('/get-sections')
 @login_required
 def get_sections():
-    """Return dynamically updated sections list HTML"""
+    """Dynamic sections loader with error handling"""
     try:
+        logger.debug("Loading sections for dynamic update")
+
         user_spreadsheets = Spreadsheet.query.options(
             joinedload(Spreadsheet.sheets)
         ).filter_by(user_id=current_user.id).all()
@@ -382,60 +441,73 @@ def get_sections():
             sheets = [sheet for sheet in spreadsheet.sheets if sheet.name.lower() != 'credentials']
             sections.extend(sheets)
 
+        logger.info(f"Returning {len(sections)} sections for rendering")
         return render_template('_sections.html', sections=sections)
 
     except SQLAlchemyError as e:
-        logger.error(f"Database error fetching sections: {e}")
+        logger.error(f"Database error loading sections: {str(e)}", exc_info=True)
         return "Error loading sections", 500
     except Exception as e:
-        logger.error(f"Unexpected error fetching sections: {e}")
+        logger.error(f"Unexpected error loading sections: {str(e)}", exc_info=True)
         return "Error loading sections", 500
 
 
-# routes.py
 @main_bp.route('/get-stats')
 @login_required
 def get_stats():
-    """Return current statistics as JSON"""
+    """Statistics endpoint with verification"""
     try:
-        # Explicitly refresh session state
-        db.session.expire_all()
+        logger.debug("Refreshing quick stats")
+        db.session.expire_all()  # Refresh ORM state
         stats = get_quick_stats(current_user.id)
+
+        # Verify stats integrity
+        if not all(key in stats for key in ['total_files', 'total_sections', 'last_upload']):
+            logger.error("Incomplete stats data returned")
+            raise ValueError("Incomplete statistics data")
+
+        logger.info(f"Returning stats: {stats}")
         return jsonify({
             'total_files': stats['total_files'],
             'total_sections': stats['total_sections'],
             'last_upload': stats['last_upload'].isoformat() if stats['last_upload'] else None
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Error loading stats: {str(e)}", exc_info=True)
+        return jsonify({"error": "Failed to load statistics"}), 500
 
 
 @main_bp.route('/create_section', methods=['POST'])
 @login_required
 def create_section():
+    """Section creation with validation and verification"""
     try:
-        # Get JSON data instead of form data
         data = request.get_json()
-        spreadsheet_id = data.get('spreadsheet_id')
-        section_name = data.get('section_name')
+        logger.debug(f"Create section request: {data}")
 
         # Validate input
-        if not all([spreadsheet_id, section_name]):
+        required_fields = ['spreadsheet_id', 'section_name']
+        if not all(field in data for field in required_fields):
+            logger.error("Missing required fields for section creation")
             return jsonify({
                 "status": "error",
-                "message": "Both spreadsheet ID and section name are required"
+                "message": "Spreadsheet ID and section name are required"
             }), 400
 
-        # Verify spreadsheet exists and belongs to user
+        spreadsheet_id = data['spreadsheet_id']
+        section_name = data['section_name']
+
+        # Verify spreadsheet ownership
         spreadsheet = Spreadsheet.query.filter_by(
             id=spreadsheet_id,
             user_id=current_user.id
         ).first()
 
         if not spreadsheet:
+            logger.warning(f"Spreadsheet not found or access denied: {spreadsheet_id}")
             return jsonify({
                 "status": "error",
-                "message": "Spreadsheet not found or access denied"
+                "message": "Spreadsheet not found"
             }), 404
 
         # Create new section
@@ -445,36 +517,45 @@ def create_section():
         )
         db.session.add(new_sheet)
         db.session.commit()
+        logger.info(f"Section created: ID {new_sheet.id}")
+
+        # Verify creation
+        db_sheet = Sheet.query.get(new_sheet.id)
+        if not db_sheet:
+            logger.critical("SECTION CREATION VERIFICATION FAILED: Record not found")
+            raise RuntimeError("Section creation verification failed")
 
         return jsonify({
             "status": "success",
             "message": "Section created successfully",
             "section": {
-                "id": new_sheet.id,
-                "name": new_sheet.name,
-                "spreadsheet_id": new_sheet.spreadsheet_id
+                "id": db_sheet.id,
+                "name": db_sheet.name,
+                "spreadsheet_id": db_sheet.spreadsheet_id
             }
         }), 200
 
     except SQLAlchemyError as e:
-        logger.error(f"Database error creating section: {str(e)}")
+        logger.error(f"Database error creating section: {str(e)}", exc_info=True)
         db.session.rollback()
         return jsonify({
             "status": "error",
             "message": "Database operation failed"
         }), 500
-
     except Exception as e:
-        logger.error(f"Unexpected error creating section: {str(e)}")
+        logger.error(f"Unexpected error creating section: {str(e)}", exc_info=True)
         return jsonify({
             "status": "error",
-            "message": "Internal server error"
+            "message": "System error creating section"
         }), 500
+
 
 @main_bp.route('/get_status_options')
 @login_required
 def get_status_options():
+    """Status options loader with error handling"""
     try:
+        logger.debug("Loading distinct status options")
         statuses = (
             db.session.query(Link.status)
             .join(Sheet)
@@ -483,7 +564,9 @@ def get_status_options():
             .distinct()
             .all()
         )
-        return jsonify([status[0] for status in statuses if status[0]])
+        options = [status[0] for status in statuses if status[0]]
+        logger.info(f"Found {len(options)} distinct status options")
+        return jsonify(options)
     except Exception as e:
-        current_app.logger.error(f"Status options error: {str(e)}", exc_info=True)
+        logger.error(f"Error loading status options: {str(e)}", exc_info=True)
         return jsonify({"error": "Failed to load status options"}), 500

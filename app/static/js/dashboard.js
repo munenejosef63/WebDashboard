@@ -68,7 +68,7 @@ function setupEventListeners() {
     // File Upload Form
     const uploadForm = document.querySelector('form[enctype="multipart/form-data"]');
     if (uploadForm) {
-        uploadForm.addEventListener('submit', handleFileUpload);
+       uploadForm.addEventListener('submit', handleFileUpload);
     }
 
     // Section Creation Form
