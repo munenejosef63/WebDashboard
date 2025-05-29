@@ -116,7 +116,6 @@ async function handleFileUpload(e) {
         }
 
         await handleUploadSuccess(elements, data, form);
-        window.location.reload();  // Force refresh to update stats
 
     } catch (error) {
         handleUploadError(elements, error);
@@ -216,6 +215,48 @@ async function refreshSectionDropdown() {
     } catch (error) {
         console.error('Failed to refresh sections:', error);
         showToast('Failed to refresh sections list', 'error');
+        throw error;
+    }
+}
+
+
+async function refreshStats() {
+    try {
+        // Fetch stats from the backend. Appending Date.now() prevents caching.
+        const response = await fetch(`${APP_URLS.getStatsUrl}?_=${Date.now()}`);
+        if (!response.ok) {
+            // If response is not OK (e.g., 404, 500), throw an error
+            throw new Error(`Failed to fetch stats: ${response.statusText}`);
+        }
+
+        const stats = await response.json(); // Parse the JSON response
+
+        // Get the elements where stats are displayed using their data-stat attributes
+        const statsFilesElement = document.querySelector('[data-stat="files"]');
+        const statsSectionsElement = document.querySelector('[data-stat="sections"]');
+        const statsLastUploadElement = document.querySelector('[data-stat="last-upload"]');
+
+        // Update the text content of these elements
+        if (statsFilesElement) {
+            statsFilesElement.textContent = stats.total_files || '0';
+        }
+        if (statsSectionsElement) {
+            statsSectionsElement.textContent = stats.total_sections || '0';
+        }
+        if (statsLastUploadElement) {
+            // Format the ISO 8601 string into a user-friendly local date/time
+            if (stats.last_upload) {
+                const lastUploadDate = new Date(stats.last_upload);
+                statsLastUploadElement.textContent = lastUploadDate.toLocaleString();
+            } else {
+                statsLastUploadElement.textContent = 'N/A';
+            }
+        }
+
+    } catch (error) {
+        console.error('Failed to refresh quick stats:', error);
+        showToast('Failed to refresh dashboard statistics', 'error');
+        // Re-throw the error so Promise.allSettled can catch its rejected status
         throw error;
     }
 }

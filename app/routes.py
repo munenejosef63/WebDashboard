@@ -11,6 +11,7 @@ from datetime import datetime
 from flask_wtf.csrf import validate_csrf
 from app.models import Spreadsheet, Sheet, Link, db, get_quick_stats
 from .utils import allowed_file, process_uploaded_file
+from .utils import UPLOAD_PROGRESS
 
 # Configure detailed logging
 logging.basicConfig(
@@ -25,9 +26,6 @@ logger = logging.getLogger(__name__)
 
 # Create blueprint
 main_bp = Blueprint('main', __name__)
-
-UPLOAD_PROGRESS = {}  # Global state for upload tracking
-
 
 @main_bp.route('/')
 def index():
@@ -205,6 +203,7 @@ def upload_file():
             # Commit transaction
             db.session.commit()
             logger.info("Database transaction committed successfully")
+            db.session.expire_all()
 
             # Verify database update
             new_spreadsheet = Spreadsheet.query.filter_by(

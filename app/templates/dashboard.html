@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-
 <div class="container-fluid">
-    <!-- Hidden data URLs -->
     <div id="app-urls"
          data-upload-url="{{ url_for('main.upload_file') }}"
          data-status-url="{{ url_for('main.get_status_options') }}"
@@ -13,7 +11,6 @@
          style="display: none;">
     </div>
 
-    <!-- Main Dashboard Header -->
     <div class="dashboard-header-container">
         <div class="dashboard-header">
             <h1><i class="bi bi-speedometer2 me-2"></i>Main Dashboard</h1>
@@ -25,9 +22,7 @@
         </div>
     </div>
 
-    <!-- Dashboard Content -->
     <div class="dashboard-layout">
-        <!-- Left Sidebar - Sections & Stats -->
         <div class="sidebar left-sidebar">
             <div class="sidebar-card">
                 <div class="sidebar-card-header">
@@ -40,75 +35,70 @@
                 </div>
             </div>
 
-            <!-- Quick Stats -->
             <div class="sidebar-card">
-                <div class="sidebar-card-header">
-                    <h2 class="sidebar-title">📊 Quick Stats</h2>
+    <div class="sidebar-card-header">
+        <h2 class="sidebar-title">📊 Quick Stats</h2>
+    </div>
+    <div class="sidebar-card-body">
+        <div class="stats-container">
+            <div class="stat-row">
+                <div class="stat-icon-wrapper bg-primary">
+                    <i class="bi bi-file-earmark-text"></i>
                 </div>
-                <div class="sidebar-card-body">
-                    <div class="stats-container">
-                        <div class="stat-row">
-                            <div class="stat-icon-wrapper bg-primary">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-label">Total Files</span>
-                                <span class="stat-value">{{ total_files }}</span>
-                            </div>
-                        </div>
-                        <div class="stat-row">
-                            <div class="stat-icon-wrapper bg-success">
-                                <i class="bi bi-collection"></i>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-label">Total Sections</span>
-                                <span class="stat-value">{{ total_sections }}</span>
-                            </div>
-                        </div>
-                        <div class="stat-row">
-                            <div class="stat-icon-wrapper bg-info">
-                                <i class="bi bi-clock-history"></i>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-label">Last Upload</span>
-                                <span class="stat-value">
-                                    {{ last_upload.strftime('%m/%d/%Y') if last_upload else 'N/A' }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="stat-content">
+                    <span class="stat-label">Total Files</span>
+                    <span class="stat-value" data-stat="files">{{ total_files }}</span>
+                </div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-icon-wrapper bg-success">
+                    <i class="bi bi-collection"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Total Sections</span>
+                    <span class="stat-value" data-stat="sections">{{ total_sections }}</span>
+                </div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-icon-wrapper bg-info">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Last Upload</span>
+                    <span class="stat-value" data-stat="last-upload">
+                        {{ last_upload.strftime('%m/%d/%Y %H:%M:%S') if last_upload else 'N/A' }}
+                    </span>
                 </div>
             </div>
         </div>
-
-        <!-- Main Content Area -->
+    </div>
+</div>
+</div>
         <div class="main-content">
-            <!-- File Upload Section -->
             <div class="form-card upload-container">
                 <div class="card-header">
                     <h3><i class="bi bi-upload me-2"></i>Upload New File</h3>
                 </div>
                 <div class="card-body">
                      <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
-                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <div class="mb-3">
-        <div class="input-group">
-            <input type="file"
-                   class="form-control"
-                   id="fileInput"
-                   name="file"
-                   accept=".csv, .xls, .xlsx"
-                   required>
-            <button type="submit" class="btn btn-success">
-                <i class="bi bi-upload me-1"></i> Upload
-            </button>
-        </div>
-        <div class="form-text">
-            Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
-        </div>
-    </div>
-</form>
-                    <!-- Upload Progress -->
+                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <input type="file"
+                                       class="form-control"
+                                       id="fileInput"
+                                       name="file"
+                                       accept=".csv, .xls, .xlsx"
+                                       required>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-upload me-1"></i> Upload
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
+                            </div>
+                        </div>
+                    </form>
                     <div id="upload-progress-container" class="mt-3" style="display: none;">
                         <div class="d-flex justify-content-between mb-2">
                             <span id="upload-status">Status: Preparing upload...</span>
@@ -118,11 +108,11 @@
                             <div id="upload-progress" class="progress-bar progress-bar-striped progress-bar-animated"
                                  role="progressbar" style="width: 0%"></div>
                         </div>
+                        <div id="upload-success-message" class="mt-3 text-success" style="display: none;"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section Creation Form -->
             <div class="form-card section-creation-container mt-4">
                 <div class="card-header">
                     <h3><i class="bi bi-folder-plus me-2"></i>Create New Section</h3>

@@ -67,22 +67,25 @@ def process_uploaded_file(file_path: str, user_id: int) -> str:
         total_sheets = len([n for n in sheet_data if n.lower() != 'credentials'])
         processed_sheets = 0
 
-        def update_progress(sheet_name: str):
-            nonlocal processed_sheets
-            progress = 20 + int((processed_sheets / total_sheets) * 70) if total_sheets else 0
+        # This `update_progress` is specific to `process_uploaded_file`'s context
+        # and will be passed down to `process_valid_spreadsheet`.
+        def callback_for_progress(current_sheet_name: str, sheet_count: int, total_count: int):
+            nonlocal processed_sheets # Use nonlocal to modify `processed_sheets` in the outer function
+            processed_sheets = sheet_count # Update processed_sheets based on the callback
+            progress = 20 + int((processed_sheets / total_count) * 70) if total_count else 0
             UPLOAD_PROGRESS[user_id].update({
-                "status": f"Processing {sheet_name}",
+                "status": f"Processing {current_sheet_name}",
                 "progress": progress,
-                "current_sheet": sheet_name
+                "current_sheet": current_sheet_name
             })
-            processed_sheets += 1
+
 
         result = process_valid_spreadsheet(
             uploaded_file_name,
             user_id,
             sheet_data,
             status,
-            progress_callback=update_progress
+            progress_callback=callback_for_progress # Pass the local callback
         )
 
         UPLOAD_PROGRESS[user_id].update({"status": "Finalizing", "progress": 95})
@@ -103,7 +106,13 @@ def process_uploaded_file(file_path: str, user_id: int) -> str:
         logger.error(f"Unexpected error: {str(e)}", exc_info=True)
         raise
     finally:
-        UPLOAD_PROGRESS.pop(user_id, None)
+        # Ensure progress is set to 100% or an error state on completion/failure
+        if user_id in UPLOAD_PROGRESS:
+            if "error" in UPLOAD_PROGRESS[user_id]:
+                UPLOAD_PROGRESS[user_id].update({"progress": 100, "status": "Failed"})
+            else:
+                UPLOAD_PROGRESS[user_id].update({"progress": 100, "status": "Completed"})
+        # UPLOAD_PROGRESS.pop(user_id, None) # Consider keeping it for a short while for client to fetch final state
 
 
 def read_and_validate_file(file_path: str) -> tuple:
@@ -134,7 +143,8 @@ def process_valid_spreadsheet(
         filename: str,
         user_id: int,
         sheet_data: Dict[str, pd.DataFrame],
-        status: str
+        status: str,
+        progress_callback=None # <--- ADDED THIS PARAMETER
 ) -> str:
     """Process validated spreadsheet data into database"""
     new_spreadsheet = Spreadsheet(
@@ -152,21 +162,27 @@ def process_valid_spreadsheet(
         if sheet_name.lower() == 'credentials':
             continue
 
-        update_progress(user_id, processed_sheets, total_sheets, sheet_name)
+        # Call the progress_callback here
+        if progress_callback:
+            progress_callback(sheet_name, processed_sheets + 1, total_sheets) # <--- MODIFIED TO USE THE PASSED CALLBACK
+
         process_sheet(new_spreadsheet.id, sheet_name, sheet_df)
         processed_sheets += 1
 
     logger.info(f"File '{filename}' successfully processed as {status}")
     return status
 
-
-def update_progress(user_id: int, processed: int, total: int, sheet_name: str):
-    """Update global upload progress state"""
-    progress = int((processed / total) * 100) if total > 0 else 0
-    UPLOAD_PROGRESS[user_id] = {
-        "status": f"Processing {sheet_name}",
-        "progress": progress
-    }
+# The `update_progress` function was causing confusion and is now replaced by the `progress_callback` mechanism
+# within `process_uploaded_file` and `process_valid_spreadsheet`.
+# You can remove this standalone `update_progress` function if it's no longer used anywhere else.
+# For now, I'll comment it out to show the primary fix.
+# def update_progress(user_id: int, processed: int, total: int, sheet_name: str):
+#     """Update global upload progress state"""
+#     progress = int((processed / total) * 100) if total > 0 else 0
+#     UPLOAD_PROGRESS[user_id] = {
+#         "status": f"Processing {sheet_name}",
+#         "progress": progress
+#     }
 
 
 def process_sheet(spreadsheet_id: int, sheet_name: str, sheet_df: pd.DataFrame):
