@@ -1,90 +1,670 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ current_section.name }} Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Previous styles remain unchanged */
-        /* Added dashboard layout styles */
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 30px;
-            margin-top: 20px;
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #6c757d;
+            --success-color: #06d6a0;
+            --danger-color: #ef476f;
+            --warning-color: #ffd166;
+            --info-color: #118ab2;
+            --dark-bg: #1a202c;
+            --darker-bg: #131720;
+            --card-bg: #2d3748;
+            --card-border: #3d4758;
+            --text-light: #e2e8f0;
+            --text-muted: #a0aec0;
+            --light-bg: #f8f9fa;
+            --light-border: #4a5568;
+            --white: #ffffff;
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.15);
+            --shadow-medium: 0 5px 15px rgba(0,0,0,0.2);
+            --sidebar-width: 20%;
+            --content-width: 80%;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-header {
+            background-color: var(--darker-bg);
+            padding: 1.2rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--light-border);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon i {
+            font-size: 18px;
+            color: white;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary-color), #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-navigation {
+            display: flex;
+            gap: 8px;
+            background: var(--card-bg);
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        .section-navigation .nav-button {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            transition: var(--transition);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .section-navigation .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .section-navigation .nav-button.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            box-shadow: var(--shadow-light);
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex: 1;
+            gap: 25px;
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         .add-link-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex: 0 0 var(--sidebar-width);
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-medium);
+            transition: var(--transition);
+            border: 1px solid var(--card-border);
         }
 
-        .section-labels a.active {
-            background-color: #007bff;
-            color: white !important;
+        .links-display-section {
+            flex: 1;
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-medium);
+            transition: var(--transition);
+            border: 1px solid var(--card-border);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-border);
+        }
+
+        .card-title i {
+            background: var(--primary-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            background-color: var(--darker-bg);
+            border: 1px solid var(--light-border);
+            border-radius: 10px;
+            font-size: 1rem;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23a0aec0'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 1.2em;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+
+        .btn-primary {
+            color: var(--white);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn-primary i {
+            font-size: 1.1rem;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .link-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--darker-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--card-border);
+            height: 100%;
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-color: var(--primary-color);
+        }
+
+        .link-status {
+            height: 6px;
+        }
+
+        .link-status.static {
+            background-color: var(--info-color);
+        }
+
+        .link-status.urgent {
+            background-color: var(--danger-color);
+        }
+
+        .link-status.unknown {
+            background-color: var(--secondary-color);
+        }
+
+        .link-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .link-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .link-icon i {
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+
+        .link-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+
+        .link-url {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: auto;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .link-actions {
+            display: flex;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.1);
+            border-top: 1px solid var(--light-border);
+        }
+
+        .link-action {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .link-action:hover {
+            color: var(--primary-color);
+        }
+
+        .link-action i {
+            margin-right: 6px;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 60px 0;
+            font-size: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-icon i {
+            font-size: 36px;
+            color: var(--primary-color);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 12px;
+        }
+
+        .badge-static {
+            background-color: rgba(6, 214, 160, 0.15);
+            color: var(--success-color);
+        }
+
+        .badge-urgent {
+            background-color: rgba(239, 71, 111, 0.15);
+            color: var(--danger-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        .badge-unknown {
+            background-color: rgba(108, 117, 125, 0.15);
+            color: var(--secondary-color);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 71, 111, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(239, 71, 111, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 71, 111, 0); }
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--darker-bg);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid var(--card-border);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-1 .stat-icon { background: rgba(67, 97, 238, 0.15); }
+        .stat-2 .stat-icon { background: rgba(6, 214, 160, 0.15); }
+        .stat-3 .stat-icon { background: rgba(239, 71, 111, 0.15); }
+
+        .stat-icon i {
+            font-size: 20px;
+        }
+
+        .stat-1 .stat-icon i { color: var(--primary-color); }
+        .stat-2 .stat-icon i { color: var(--success-color); }
+        .stat-3 .stat-icon i { color: var(--danger-color); }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .dashboard-content {
+                padding: 20px;
+            }
+
+            .links-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-content {
+                flex-direction: column;
+            }
+
+            .add-link-section,
+            .links-display-section {
+                width: 100%;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+                padding: 1.5rem;
+            }
+
+            .section-navigation {
+                width: 100%;
+                overflow-x: auto;
+                padding: 5px;
+            }
+
+            .section-navigation .nav-button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            .links-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .dashboard-header h1 {
+                font-size: 1.4rem;
+            }
+
+            .card-title {
+                font-size: 1.2rem;
+            }
+
+            .form-control, .btn {
+                padding: 12px 15px;
+            }
+
+            .link-content {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Section Navigation -->
-    <div class="section-labels">
-        {% for section in sections %}
-            <a href="{{ url_for('main.dashboard_section', section_name=section.name) }}"
-               class="section-link {% if section.id == current_section.id %}active{% endif %}">
-                {{ section.name }}
-            </a>
-        {% endfor %}
+    <div class="dashboard-header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h1>LinkFlow Dashboard</h1>
+            </div>
+        </div>
+        <nav class="section-navigation">
+            {% for section in sections %}
+                <a href="{{ url_for('main.dashboard_section', section_name=section.name) }}"
+                   class="nav-button {% if section.id == current_section.id %}active{% endif %}">
+                    {{ section.name }}
+                </a>
+            {% endfor %}
+        </nav>
     </div>
 
-    <div class="container mt-5">
-        <h1>{{ current_section.name }} Dashboard</h1>
+    <div class="dashboard-content">
+        <div class="add-link-section">
+            <h2 class="card-title">
+                <i class="fas fa-plus"></i>
+                Add New Link
+            </h2>
+            <form id="addLinkForm">
+                <input type="hidden" name="section_id" value="{{ current_section.id }}">
+                <div class="form-group">
+                    <label class="form-label" for="title">Link Title</label>
+                    <input type="text" class="form-control" name="title" id="title" placeholder="Enter link title" required aria-label="Link Title">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="url">Link URL</label>
+                    <input type="url" class="form-control" name="url" id="url" placeholder="https://example.com" required aria-label="Link URL">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="status">Status</label>
+                    <select class="form-control" name="status" id="status" aria-label="Link Status">
+                        <option value="static">Static</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="unknown">Unknown</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i>
+                    Add Link
+                </button>
+            </form>
+        </div>
 
-        <div class="dashboard-container">
-            <!-- Left Column - Add Link Section -->
-            <div class="add-link-section">
-                <h3>Add New Link</h3>
-                <form id="addLinkForm">
-                    <input type="hidden" name="section_id" value="{{ current_section.id }}">
-                    <div class="form-group">
-                        <input type="text" class="form-control" name="title" placeholder="Link Title" required>
+        <div class="links-display-section">
+            <h2 class="card-title">
+                <i class="fas fa-link"></i>
+                Current Links
+            </h2>
+
+            <div class="stats-bar">
+                <div class="stat-card stat-1">
+                    <div class="stat-icon">
+                        <i class="fas fa-layer-group"></i>
                     </div>
-                    <div class="form-group">
-                        <input type="url" class="form-control" name="url" placeholder="https://example.com" required>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ data|length }}</div>
+                        <div class="stat-label">Total Links</div>
                     </div>
-                    <div class="form-group">
-                        <select class="form-control" name="status">
-                            <option value="static">Static</option>
-                            <option value="urgent">Urgent</option>
-                            <option value="unknown">Unknown</option>
-                        </select>
+                </div>
+                <div class="stat-card stat-2">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
                     </div>
-                    <button type="submit" class="btn btn-primary">Add Link</button>
-                </form>
+                    <div class="stat-info">
+                        <div class="stat-value">
+                            {% set static_count = data|selectattr('status', 'equalto', 'static')|list|length %}
+                            {{ static_count }}
+                        </div>
+                        <div class="stat-label">Static</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-3">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value">
+                            {% set urgent_count = data|selectattr('status', 'equalto', 'urgent')|list|length %}
+                            {{ urgent_count }}
+                        </div>
+                        <div class="stat-label">Urgent</div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Right Column - Links Display -->
-            <div class="links-container">
-                {% if data %}
-                    <div class="button-container">
-                        {% for row in data %}
-                        <a href="{{ row.url }}"
-                           class="btn btn-{{ row.status }}"
-                           target="_blank">
-                            {{ row.title }}
-                        </a>
-                        {% endfor %}
+            {% if data %}
+                <div class="links-grid">
+                    {% for row in data %}
+                    <a href="{{ row.url }}" class="link-card" target="_blank" rel="noopener noreferrer">
+                        <div class="link-status {{ row.status }}"></div>
+                        <div class="link-content">
+                            <div class="link-icon">
+                                <i class="fas fa-external-link-alt"></i>
+                            </div>
+                            <div class="link-title">{{ row.title }}</div>
+                            <div class="link-url">{{ row.url|truncate(30, true) }}</div>
+                            <div class="status-badge badge-{{ row.status }}">
+                                {{ row.status|capitalize }}
+                            </div>
+                        </div>
+                        <div class="link-actions">
+                            <a href="#" class="link-action">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="#" class="link-action">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-muted">
+                    <div class="empty-icon">
+                        <i class="fas fa-link"></i>
                     </div>
-                {% else %}
-                    <p class="text-muted">No links found in this section.</p>
-                {% endif %}
-            </div>
+                    <p>No links found in this section. Add some using the form!</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 
     <script>
-        // JavaScript remains the same
         document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = {
@@ -105,6 +685,8 @@
 
                 const result = await response.json();
                 if (result.status === 'success') {
+                    // Clear the form and reload the page or dynamically add the new link
+                    e.target.reset();
                     window.location.reload();
                 } else {
                     alert('Error: ' + result.message);
@@ -113,6 +695,17 @@
                 console.error('Error:', error);
                 alert('An error occurred. Please try again.');
             }
+        });
+
+        // Add animation to cards on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.link-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
         });
     </script>
 </body>

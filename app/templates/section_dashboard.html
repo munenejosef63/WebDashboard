@@ -4,374 +4,731 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ current_section.name }} Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-color: #007bff;
-            --success-color: #00cc88;
-            --danger-color: #ff4444;
-            --text-primary: #1a1a1a;
-            --text-secondary: #666;
-            --background-light: #f8f9fa;
-            --border-color: rgba(0,0,0,0.08);
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #6c757d;
+            --success-color: #06d6a0;
+            --danger-color: #ef476f;
+            --warning-color: #ffd166;
+            --info-color: #118ab2;
+            --dark-bg: #1a202c;
+            --darker-bg: #131720;
+            --card-bg: #2d3748;
+            --card-border: #3d4758;
+            --text-light: #e2e8f0;
+            --text-muted: #a0aec0;
+            --light-bg: #f8f9fa;
+            --light-border: #4a5568;
+            --white: #ffffff;
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.15);
+            --shadow-medium: 0 5px 15px rgba(0,0,0,0.2);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #212529;
             line-height: 1.6;
-            background-color: #ffffff;
-            color: var(--text-primary);
-            margin: 0;
-            padding: 20px;
+            min-height: 100vh;
         }
 
-        .dashboard-wrapper {
-            max-width: 1440px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 32px;
-        }
-
-        /* Navigation Sidebar */
-        .section-nav {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-            height: fit-content;
-        }
-
-        .section-nav-header {
-            margin-bottom: 24px;
-        }
-
-        .section-nav-header h1 {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 0;
-            color: var(--text-primary);
-        }
-
-        .section-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .section-item {
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .section-item:hover {
-            background: var(--background-light);
-            color: var(--primary-color);
-        }
-
-        .section-item.active {
-            background: var(--primary-color);
-            color: white;
-            font-weight: 500;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 32px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-        }
-
-        .content-header {
+        .dashboard-header {
+            background-color: white;
+            padding: 1.2rem 2.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: var(--shadow-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .content-header h2 {
-            font-size: 24px;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon i {
+            font-size: 18px;
+            color: white;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #212529;
             margin: 0;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
             font-weight: 600;
+            color: var(--primary-color);
         }
 
-        /* Add Link Form */
-        .link-form {
-            background: var(--background-light);
+        .section-navigation {
+            display: flex;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 8px;
             border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 32px;
+            flex-wrap: wrap;
+            border: 1px solid #dee2e6;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+        .section-navigation .nav-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #495057;
+            font-weight: 500;
+            transition: var(--transition);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .section-navigation .nav-button:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .section-navigation .nav-button.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex: 1;
+            gap: 25px;
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            height: calc(100vh - 100px); /* Ensure containers fill screen */
+        }
+
+        .add-link-section {
+            flex: 0 0 280px;
+            background-color: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+            border: 1px solid #dee2e6;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .links-display-section {
+            flex: 1;
+            background-color: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+            border: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: #212529;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .card-title i {
+            background: var(--primary-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
         }
 
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 22px;
+            position: relative;
         }
 
         .form-label {
             display: block;
             margin-bottom: 8px;
-            font-size: 14px;
-            color: var(--text-secondary);
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            padding: 14px 18px;
+            background-color: white;
+            border: 1px solid #ced4da;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #495057;
+            transition: var(--transition);
         }
 
         .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
             outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25);
         }
 
-        /* Links Grid */
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23495057'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 1.2em;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+
+        .btn-primary {
+            color: var(--white);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn-primary i {
+            font-size: 1.1rem;
+        }
+
         .links-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            flex-grow: 1;
         }
 
-        .link-card {
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.2s ease;
+        /* Link Button Styles - Reduced size */
+        .link-button {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+            border: 1px solid #e2e8f0;
+            height: 100%;
+            text-decoration: none;
+            color: inherit;
             position: relative;
+            transform: translateY(0);
+            cursor: pointer;
         }
 
-        .link-card:hover {
+        .link-button:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(67, 97, 238, 0.2);
+            border-color: var(--primary-color);
+            z-index: 2;
+        }
+
+        .link-button:active {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
 
-        .link-status {
+        .link-button::before {
+            content: '';
             position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .link-button.static::before {
+            background: linear-gradient(90deg, var(--info-color), #4cc9f0);
+        }
+
+        .link-button.urgent::before {
+            background: linear-gradient(90deg, var(--danger-color), #f72585);
+        }
+
+        .link-button.unknown::before {
+            background: linear-gradient(90deg, var(--secondary-color), #9d4edd);
+        }
+
+        .link-content {
+            padding: 18px 15px 15px; /* Reduced padding */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .link-icon {
+            width: 44px; /* Reduced size */
+            height: 44px; /* Reduced size */
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 12px; /* Slightly smaller */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            margin-bottom: 15px; /* Reduced */
+            transition: var(--transition);
         }
 
-        .status-static {
-            background: rgba(0, 204, 136, 0.1);
-            color: var(--success-color);
+        .link-button:hover .link-icon {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.2), rgba(17, 138, 178, 0.2));
         }
 
-        .status-urgent {
-            background: rgba(255, 68, 68, 0.1);
-            color: var(--danger-color);
-            animation: pulse 1.5s infinite;
-        }
-
-        .status-unknown {
-            background: rgba(0,0,0,0.05);
-            color: var(--text-secondary);
+        .link-icon i {
+            font-size: 20px; /* Reduced icon size */
+            color: var(--primary-color);
         }
 
         .link-title {
-            font-size: 16px;
+            font-size: 1rem; /* Reduced font size */
+            font-weight: 700;
+            margin-bottom: 10px; /* Reduced */
+            color: #212529;
+            line-height: 1.4;
+        }
+
+        .link-description {
+            font-size: 0.85rem; /* Reduced font size */
+            color: #6c757d;
+            line-height: 1.5;
+            margin-bottom: 12px; /* Reduced */
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px; /* Reduced padding */
+            border-radius: 20px;
+            font-size: 0.75rem; /* Reduced font size */
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: auto;
+            align-self: flex-start;
+            transition: var(--transition);
+        }
+
+        .badge-static {
+            background: rgba(6, 214, 160, 0.15);
+            color: var(--success-color);
+        }
+
+        .badge-urgent {
+            background: rgba(239, 71, 111, 0.15);
+            color: var(--danger-color);
+        }
+
+        .badge-unknown {
+            background: rgba(108, 117, 125, 0.15);
+            color: var(--secondary-color);
+        }
+
+        .link-button:hover .badge-static {
+            background: rgba(6, 214, 160, 0.25);
+            transform: translateX(5px);
+        }
+
+        .link-button:hover .badge-urgent {
+            background: rgba(239, 71, 111, 0.25);
+            transform: translateX(5px);
+        }
+
+        .link-button:hover .badge-unknown {
+            background: rgba(108, 117, 125, 0.25);
+            transform: translateX(5px);
+        }
+
+        .main-dashboard-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
             font-weight: 500;
-            margin: 0 0 8px 0;
-            color: var(--text-primary);
-        }
-
-        .link-url {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-size: 14px;
-            word-break: break-all;
-            display: block;
-            margin-bottom: 16px;
-        }
-
-        .link-meta {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            font-size: 12px;
-            color: var(--text-secondary);
+            gap: 8px;
+            transition: var(--transition);
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
+        .main-dashboard-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
         }
 
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .dashboard-wrapper {
-                grid-template-columns: 1fr;
-                gap: 24px;
+        .main-dashboard-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Floating action button */
+        .floating-action {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 99;
+            border: none;
+        }
+
+        .floating-action:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.5);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .dashboard-content {
+                padding: 20px;
             }
 
-            .section-nav {
-                position: sticky;
-                top: 20px;
+            .links-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-content {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .add-link-section {
+                position: static;
+                width: 100%;
+            }
+
+            .links-display-section {
+                min-height: 500px;
             }
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 16px;
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+                padding: 1.5rem;
             }
 
-            .form-grid {
-                grid-template-columns: 1fr;
+            .header-left {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+            }
+
+            .section-navigation {
+                width: 100%;
+                overflow-x: auto;
+                padding: 5px;
+            }
+
+            .section-navigation .nav-button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
             }
 
             .links-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .dashboard-header h1 {
+                font-size: 1.4rem;
             }
 
-            .content-header h2 {
-                font-size: 20px;
+            .card-title {
+                font-size: 1.2rem;
+            }
+
+            .form-control, .btn {
+                padding: 12px 15px;
+            }
+
+            .link-content {
+                padding: 15px 12px 12px;
+            }
+
+            .link-icon {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 12px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <!-- Navigation Sidebar -->
-        <nav class="section-nav">
-            <div class="section-nav-header">
-                <h1>Sections</h1>
-            </div>
-            <div class="section-list">
-                {% for section in sections %}
+    <div class="dashboard-header">
+        <div class="header-left">
+            <a href="{{ url_for('main.dashboard') }}" class="logo">
+                <div class="logo-icon">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+                <h1>Dashboard</h1>
+            </a>
+            <div class="section-title">{{ current_section.name }}</div>
+        </div>
+        <nav class="section-navigation">
+            {% for section in sections %}
                 <a href="{{ url_for('main.dashboard_section', section_name=section.name) }}"
-                   class="section-item {% if section.id == current_section.id %}active{% endif %}">
-                   <i class="bi bi-folder"></i>
-                   {{ section.name }}
+                   class="nav-button {% if section.id == current_section.id %}active{% endif %}">
+                    {{ section.name }}
                 </a>
-                {% endfor %}
-            </div>
+            {% endfor %}
         </nav>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="content-header">
-                <h2>{{ current_section.name }} Dashboard</h2>
-            </div>
-
-            <!-- Add Link Form -->
-            <section class="link-form">
-                <h3>Add New Link</h3>
-                <form id="addLinkForm" class="form-grid">
-                    <input type="hidden" name="section_id" value="{{ current_section.id }}">
-
-                    <div class="form-group">
-                        <label class="form-label">Link Title</label>
-                        <input type="text" class="form-control" name="title" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">URL</label>
-                        <input type="url" class="form-control" name="url" placeholder="https://example.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select class="form-control" name="status">
-                            <option value="static">Static</option>
-                            <option value="urgent">Urgent</option>
-                            <option value="unknown">Unknown</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="submit" class="form-control btn-primary">
-                            <i class="bi bi-plus-circle"></i> Add Link
-                        </button>
-                    </div>
-                </form>
-            </section>
-
-            <!-- Links Grid -->
-            <section class="links-grid">
-                {% if data %}
-                    {% for row in data %}
-                    <article class="link-card">
-                        <div class="link-status status-{{ row.status }}">
-                            {% if row.status == 'static' %}<i class="bi bi-check-circle"></i>
-                            {% elif row.status == 'urgent' %}<i class="bi bi-exclamation-triangle"></i>
-                            {% else %}<i class="bi bi-question-circle"></i>
-                            {% endif %}
-                        </div>
-                        <h3 class="link-title">{{ row.title }}</h3>
-                        <a href="{{ row.link }}" class="link-url" target="_blank">
-                            {{ row.link|truncate(40) }}
-                        </a>
-                        <div class="link-meta">
-                            <span>Added {{ row.created_at|datetimeformat }}</span>
-                            <div class="link-actions">
-                                <button class="btn-icon"><i class="bi bi-pencil"></i></button>
-                                <button class="btn-icon"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </div>
-                    </article>
-                    {% endfor %}
-                {% else %}
-                    <div class="empty-state">
-                        <p class="text-muted">No links found in this section.</p>
-                    </div>
-                {% endif %}
-            </section>
-        </main>
+        <a href="{{ url_for('auth.logout') }}" class="main-dashboard-btn">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
     </div>
 
+    <div class="dashboard-content">
+        <div class="add-link-section">
+            <h2 class="card-title">
+                <i class="bi bi-plus-lg"></i>
+                Add New Link
+            </h2>
+            <form id="addLinkForm">
+                <input type="hidden" name="section_id" value="{{ current_section.id }}">
+                <div class="form-group">
+                    <label class="form-label" for="title">Link Title</label>
+                    <input type="text" class="form-control" name="title" id="title" placeholder="Enter link title" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="url">Link URL</label>
+                    <input type="url" class="form-control" name="url" id="url" placeholder="https://example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="status">Status</label>
+                    <select class="form-control" name="status" id="status" required>
+                        <option value="" disabled selected>Select status...</option>
+                        <option value="static">Static</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="unknown">Unknown</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Add Link
+                </button>
+            </form>
+        </div>
+
+        <div class="links-display-section">
+            <h2 class="card-title">
+                <i class="bi bi-link-45deg"></i>
+                Current Links
+            </h2>
+
+            {% if data %}
+                <div class="links-grid">
+                    {% for row in data %}
+                    <a href="{{ row.url }}" target="_blank" class="link-button {{ row.status }}">
+                        <div class="link-content">
+                            <div class="link-icon">
+                                <i class="bi bi-link-45deg"></i>
+                            </div>
+                            <div class="link-title">{{ row.title }}</div>
+                            <div class="link-description">Click to visit this resource</div>
+                            <div class="status-badge badge-{{ row.status }}">
+                                {{ row.status|capitalize }}
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-muted" style="text-align: center; padding: 40px 0; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div class="empty-icon" style="font-size: 48px; color: #a0aec0; margin-bottom: 20px;">
+                        <i class="bi bi-link-45deg"></i>
+                    </div>
+                    <p>No links found in this section. Add some using the form!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Floating action button -->
+    <button class="floating-action" title="Add New Link" onclick="document.getElementById('addLinkForm').scrollIntoView({behavior: 'smooth'})">
+        <i class="bi bi-plus-lg"></i>
+    </button>
+
     <script>
-        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = {
-                section_id: e.target.section_id.value,
-                title: e.target.title.value,
-                url: e.target.url.value,
-                status: e.target.status.value
-            };
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add new link form submission
+            const addLinkForm = document.getElementById('addLinkForm');
+            if (addLinkForm) {
+                addLinkForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
 
-            try {
-                const response = await fetch('/add_link', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
+                    const formData = {
+                        section_id: this.section_id.value,
+                        title: this.title.value,
+                        url: this.url.value,
+                        status: this.status.value
+                    };
+
+                    try {
+                        const response = await fetch('{{ url_for("main.add_link") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify(formData)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.status === 'success') {
+                            showToast('Link added successfully!', 'success');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showToast('Error: ' + result.message, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showToast('An error occurred. Please try again.', 'error');
+                    }
                 });
-
-                const result = await response.json();
-                if (result.status === 'success') {
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
             }
+
+            // Add animation to buttons on page load
+            const buttons = document.querySelectorAll('.link-button');
+            buttons.forEach((button, index) => {
+                button.style.opacity = '0';
+                button.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    button.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    button.style.opacity = '1';
+                    button.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
         });
+
+        // Enhanced Toast Notification
+        function showToast(message, type) {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-20 end-0 p-3';
+                toastContainer.style.zIndex = '9999';
+                document.body.appendChild(toastContainer);
+            }
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast show align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+
+            // Icon based on type
+            const icon = type === 'success' ?
+                '<i class="bi bi-check-circle-fill me-2"></i>' :
+                '<i class="bi bi-exclamation-circle-fill me-2"></i>';
+
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <div class="toast-icon fs-4">${icon}</div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-3" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Auto remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.5s';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
     </script>
 </body>
 </html>
