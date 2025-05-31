@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
+{% block title %}DashboardSections{% endblock %}
+{% block content %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -24,6 +27,7 @@
             --light-bg: #f8f9fa;
             --light-border: #4a5568;
             --white: #ffffff;
+            --orange-bg: #FFE0B2;
             --shadow-light: 0 2px 10px rgba(0,0,0,0.15);
             --shadow-medium: 0 5px 15px rgba(0,0,0,0.2);
             --transition: all 0.3s ease;
@@ -41,8 +45,9 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Montserrat','Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            background-color: var(--orange-bg);
             color: #212529;
             line-height: 1.6;
             display: flex;
@@ -131,8 +136,10 @@
             text-align: center; /* Center text */
         }
 
+        /* HOVER EFFECT FOR NAV BUTTONS */
         .section-navigation .nav-button:hover {
-            background-color: rgba(67, 97, 238, 0.1);
+            background-color: var(--primary-color);
+            color: var(--white);
         }
 
         .section-navigation .nav-button.active {
@@ -299,11 +306,32 @@
             cursor: pointer;
         }
 
+        /* HOVER EFFECT FOR LINK BUTTONS */
         .link-button:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 25px rgba(67, 97, 238, 0.2);
             border-color: var(--primary-color);
+            background-color: var(--primary-color);
+            color: white;
             z-index: 2;
+        }
+
+        /* Update text colors on hover */
+        .link-button:hover .link-title,
+        .link-button:hover .link-description,
+        .link-button:hover .status-badge {
+            color: white !important;
+        }
+
+        /* Update badge styles on hover */
+        .link-button:hover .status-badge {
+            background: transparent !important;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Update top bar on hover */
+        .link-button:hover::before {
+            background: var(--primary-color);
         }
 
         .link-button:active {
@@ -339,6 +367,7 @@
             justify-content: center; /* Center content vertically */
             align-items: center; /* Center content horizontally */
             text-align: center; /* Center text */
+            min-height: 0;
         }
 
         .link-title {
@@ -347,6 +376,11 @@
             margin-bottom: 10px;
             color: #212529;
             line-height: 1.4;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            width: 100%;
+            padding: 0 5px;
+            transition: color 0.3s ease;
         }
 
         .link-description {
@@ -354,6 +388,7 @@
             color: #6c757d;
             line-height: 1.5;
             margin-bottom: 12px;
+            transition: color 0.3s ease;
         }
 
         .status-badge {
@@ -367,6 +402,7 @@
             margin-top: auto;
             align-self: center; /* Center badge */
             transition: var(--transition);
+            border: 1px solid transparent;
         }
 
         .badge-static {
@@ -540,6 +576,12 @@
                 padding: 15px 12px 12px;
             }
         }
+
+        @media (max-width: 768px) {
+    .link-title {
+        padding: 0 8px; /* More padding on smaller screens */
+    }
+}
     </style>
 </head>
 <body>
@@ -573,6 +615,7 @@
                 Add New Link
             </h2>
             <form id="addLinkForm">
+
                 <input type="hidden" name="section_id" value="{{ current_section.id }}">
                 <div class="form-group">
                     <label class="form-label" for="title">Link Title</label>
@@ -610,13 +653,8 @@
                     <a href="{{ row.url }}" target="_blank" class="link-button {{ row.status }}">
                         <div class="link-content">
                             <div class="link-icon">
-                                <i class="bi bi-link-45deg"></i>
                             </div>
                             <div class="link-title">{{ row.title }}</div>
-                            <div class="link-description">Click to visit this resource</div>
-                            <div class="status-badge badge-{{ row.status }}">
-                                {{ row.status|capitalize }}
-                            </div>
                         </div>
                     </a>
                     {% endfor %}
@@ -735,4 +773,5 @@
         }
     </script>
 </body>
-</html>
+
+{% endblock %}
