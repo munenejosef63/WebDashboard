@@ -40,10 +40,10 @@ def create_app(config_name='default'):
     login_manager.login_view = 'auth.login'
     login_manager.session_protection = "basic"
 
-    # Custom Jinja filter
+    # Custom Jinja filter - fixed variable shadowing
     @app.template_filter('datetimeformat')
-    def datetimeformat(value, format='%Y-%m-%d %H:%M'):
-        return value.strftime(format) if value else ""
+    def datetime_format(value, date_format='%Y-%m-%d %H:%M'):
+        return value.strftime(date_format) if value else ""
 
     # User loader callback
     @login_manager.user_loader
@@ -68,5 +68,14 @@ def create_app(config_name='default'):
     with app.app_context():
         db.create_all()
         app.logger.debug("Database tables created (if needed)")
+
+        # Create admin user if doesn't exist
+        from app.models import User
+        if not User.query.filter_by(username='admin').first():
+            admin = User(username='admin')
+            admin.set_password('admin')
+            db.session.add(admin)
+            db.session.commit()
+            app.logger.info("Created admin user: admin/admin")
 
     return app

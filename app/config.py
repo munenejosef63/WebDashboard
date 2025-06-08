@@ -5,7 +5,7 @@ class Config:
     """
     Base configuration class with default settings for the application.
     """
-    SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key-4a7d89f3e2b1c05f9e6d8a47')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key-79a54f0f35af18efbec961f7811d74a2fa1fd6059229cd83db86d244e0c61304')
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL',
         'postgresql://postgres:Masterpiece@localhost:5432/excel_dashboard'
