@@ -1,5 +1,3 @@
-
-
 {% extends "base.html" %}
 {% block title %}DashboardSections{% endblock %}
 {% block content %}
@@ -61,7 +59,7 @@
         }
 
         .dashboard-header {
-            background-color: white;
+            background-color: #F0FFFF;
             padding: 1.2rem 2.5rem;
             display: flex;
             justify-content: space-between;
@@ -698,20 +696,22 @@
                 Current Links
             </h2>
 
-            {% if data %}
-                <div class="links-grid" id="linksContainer">
-                    {% for row in data %}
-                    <div class="link-button {{ row.status }}" data-link-id="{{ row.id }}">
-                        <a href="{{ row.url }}" target="_blank" class="link-content">
-                            <div class="link-title">{{ row.title }}</div>
-                            <button class="delete-btn" title="Delete Link">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </a>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
+{% if data %}
+    <div class="links-grid" id="linksContainer">
+        {% for row in data %}
+        <div class="link-button {{ row.status }}" data-link-id="{{ row.id }}">
+            <a href="{{ row.url }}" target="_blank" class="link-content">
+                <div class="link-title">{{ row.title }}</div>
+                <div class="link-description">{{ row.description or '' }}</div>
+                <div class="status-badge badge-{{ row.status }}">{{ row.status|capitalize }}</div>
+            </a>
+            <button class="delete-btn" title="Delete Link" data-link-id="{{ row.id }}">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
                 <div class="empty-state">
                     <div class="empty-icon">
                         <i class="bi bi-link-45deg"></i>
@@ -855,74 +855,62 @@
                 });
             }
 
-            // Delete functionality
             const confirmationModal = document.getElementById('confirmationModal');
-            const cancelDelete = document.getElementById('cancelDelete');
-            const confirmDelete = document.getElementById('confirmDelete');
-            let currentLinkToDelete = null;
+const cancelDelete = document.getElementById('cancelDelete');
+const confirmDelete = document.getElementById('confirmDelete');
+let currentLinkToDelete = null;
 
-            // Event delegation for delete buttons
-            document.getElementById('linksContainer')?.addEventListener('click', function(e) {
-                if (e.target.closest('.delete-btn')) {
-                    e.preventDefault();
-                    e.stopPropagation();
+// Event delegation for delete buttons
+document.getElementById('linksContainer')?.addEventListener('click', function(e) {
+    const deleteBtn = e.target.closest('.delete-btn');
 
-                    const linkButton = e.target.closest('.link-button');
-                    currentLinkToDelete = linkButton;
-                    console.log('Attempting to delete link ID:', linkButton.dataset.linkId);
+    if (deleteBtn) {
+        e.preventDefault();
+        e.stopPropagation();
 
-                    // Show confirmation modal
-                    confirmationModal.classList.add('active');
-                }
-            });
+        const linkId = deleteBtn.dataset.linkId;
+        const linkButton = deleteBtn.closest('.link-button');
 
-            // Cancel deletion
-            cancelDelete.addEventListener('click', function() {
-                confirmationModal.classList.remove('active');
-                currentLinkToDelete = null;
-            });
+        currentLinkToDelete = {
+            element: linkButton,
+            id: linkId
+        };
 
-            // Confirm deletion
-            confirmDelete.addEventListener('click', async function() {
-                if (!currentLinkToDelete) {
-                    showToast('No link selected for deletion', 'error');
-                    return;
-                }
+        // Show confirmation modal
+        confirmationModal.classList.add('active');
+    }
+});
 
-                const linkId = currentLinkToDelete.dataset.linkId;
+// Confirm deletion
+confirmDelete.addEventListener('click', async function() {
+    if (!currentLinkToDelete) return;
 
-                if (!linkId || isNaN(linkId)) {
-                    showToast('Invalid link ID', 'error');
-                    return;
-                }
+    const { element, id } = currentLinkToDelete;
 
-                try {
-                    const response = await fetch(`/delete_link/${linkId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token() }}'
-                        }
-                    });
+    try {
+        const response = await fetch(`/delete_link/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        });
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
 
                     const result = await response.json();
 
                     if (result.status === 'success') {
-                        // Visual effects
-                        currentLinkToDelete.style.transition = 'all 0.3s ease';
-                        currentLinkToDelete.style.transform = 'scale(0.9)';
-                        currentLinkToDelete.style.opacity = '0.5';
+                        // Visual removal effect
+                        element.style.transition = 'all 0.3s ease';
+                        element.style.transform = 'scale(0.9)';
+                        element.style.opacity = '0.5';
 
                         setTimeout(() => {
-                            currentLinkToDelete.style.transform = 'scale(0.1)';
-                            currentLinkToDelete.style.opacity = '0';
+                            element.style.transform = 'scale(0.1)';
+                            element.style.opacity = '0';
 
                             setTimeout(() => {
-                                currentLinkToDelete.remove();
+                                element.remove();
                                 confirmationModal.classList.remove('active');
 
                                 // Handle empty state

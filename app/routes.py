@@ -332,6 +332,7 @@ def dashboard_section(section_name):
         links = current_section.links
         logger.info(f"Section contains {len(links)} links")
         data = [{
+            'id': link.id,
             'title': link.title,
             'url': link.link,
             'status': link.status or 'unknown'
@@ -569,3 +570,48 @@ def get_status_options():
     except Exception as e:
         logger.error(f"Error loading status options: {str(e)}", exc_info=True)
         return jsonify({"error": "Failed to load status options"}), 500
+
+@main_bp.route('/delete_link/<int:link_id>', methods=['DELETE'])
+@login_required
+def delete_link(link_id):
+    """Delete a link with ownership verification"""
+    try:
+        # Verify link exists and belongs to current user
+        link = Link.query \
+            .join(Sheet) \
+            .join(Spreadsheet) \
+            .filter(
+                Link.id == link_id,
+                Spreadsheet.user_id == current_user.id
+            ).first()
+
+        if not link:
+            logger.warning(f"Link not found or access denied: {link_id}")
+            return jsonify({
+                "status": "error",
+                "message": "Link not found or access denied"
+            }), 404
+
+        # Delete link
+        db.session.delete(link)
+        db.session.commit()
+        logger.info(f"Link deleted: ID {link_id}")
+
+        return jsonify({
+            "status": "success",
+            "message": "Link deleted successfully"
+        }), 200
+
+    except SQLAlchemyError as e:
+        logger.error(f"Database error deleting link: {str(e)}", exc_info=True)
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "message": "Database operation failed"
+        }), 500
+    except Exception as e:
+        logger.error(f"Unexpected error deleting link: {str(e)}", exc_info=True)
+        return jsonify({
+            "status": "error",
+            "message": "System error deleting link"
+        }), 500

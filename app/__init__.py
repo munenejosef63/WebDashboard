@@ -73,7 +73,7 @@ def create_app(config_name='default'):
         from app.models import User
         if not User.query.filter_by(username='admin').first():
             admin = User(username='admin')
-            admin.set_password('admin')
+            admin.set_password('munene1234')
             db.session.add(admin)
             db.session.commit()
             app.logger.info("Created admin user: admin/admin")
