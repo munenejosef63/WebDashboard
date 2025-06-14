@@ -14,34 +14,47 @@
          style="display: none;">
     </div>
 
-    <!-- Fixed Dashboard Header -->
-    <div class="dashboard-header-container">
-        <div class="dashboard-header">
-            <h1><i class="bi bi-speedometer2 me-2"></i>Main Dashboard</h1>
-        </div>
-        <div class="logout-container">
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary logout-btn">
-                <i class="bi bi-box-arrow-right me-2"></i>Logout
-            </a>
-        </div>
+  <!-- Fixed Dashboard Header -->
+<div class="dashboard-header-container">
+    <div class="dashboard-header">
+        <h1>
+            <img src="{{ url_for('static', filename='images/dashboard_logo1.png') }}"
+                 class="rounded-circle me-2"
+                 alt="Dashboard Logo"
+                 style="width: 2.5em; height: 2.5em; object-fit: contain;">
+            {% set owner_name = current_user.username.replace('Dashboard', '') %}
+            {{ owner_name }}'s WebLinks MainDashboard
+        </h1>
     </div>
+    <div class="logout-container">
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary logout-btn">
+            <i class="bi bi-box-arrow-right me-2"></i>Logout
+        </a>
+    </div>
+</div>
+
+
 
     <!-- Fixed Action Bar -->
     <div class="action-bar">
         <div class="action-container">
             <span class="action-title">Action</span>
-            <a href="#" class="action-link" id="add-new-file-btn">
-                Add New File <i class="bi bi-plus"></i>
-            </a>
-            <a href="#" class="action-link" id="add-new-section-btn">
-                Add New Section <i class="bi bi-folder-plus"></i>
-            </a>
-            <a href="#" class="action-link text-warning" id="rename-section-btn">
-                Rename Section <i class="bi bi-pencil-square"></i>
-            </a>
-            <a href="#" class="action-link text-danger" id="delete-section-btn">
-                 Delete Section <i class="bi bi-trash"></i>
-            </a>
+
+<!-- Fixed Add New File button with icon -->
+        <a href="#" class="action-link" id="add-new-file-btn">
+            <i class="bi bi-plus me-1"></i> Add New File
+        </a>
+        <a href="#" class="action-link" id="add-new-section-btn">
+            <i class="bi bi-folder-plus me-1"></i> Add New Section
+        </a>
+        <a href="#" class="action-link text-warning" id="rename-section-btn">
+            <i class="bi bi-pencil-square me-1"></i> Rename Section
+        </a>
+        <a href="#" class="action-link text-danger" id="delete-section-btn">
+            <i class="bi bi-trash me-1"></i> Delete Section
+        </a>
+
+
             <!-- Moved Quick Stats to action container -->
             <div class="quick-stats-container">
                 <div class="stat-item">
@@ -276,6 +289,15 @@
                     </div>
                 </div>
             </div>
+
+
+            <div class="sidebar right-sidebar">
+                <img src="{{ url_for('static', filename='images/coming soon.png') }}"
+                     alt="Dashboard Visual"
+                     class="sidebar-image">
+            </div>
+
+
         </div>
 
         <!-- Footer Container -->
@@ -844,15 +866,20 @@ body {
 
 .section-pill {
     display: inline-block;
-    padding: 8px 12px;
+    padding: 10px 10px;  /* Increased from 10px 6px */
     background: #1677FF;
-    border-radius: 20px;
+    border-radius: 6px;
     color: #FFFFFF;
     text-decoration: none;
-    font-size: 12px;
+    font-size: 0.9rem;  /* Increased from 0.7rem */
+    font-weight: 500;
     transition: all 0.2s ease;
-    border: 1px solid #e2e8f0;
-    margin: 2px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 2px;  /* Slightly increased margin */
+    line-height: 0.9;  /* Better text vertical alignment */
 }
 
 .main-content {
@@ -1211,6 +1238,15 @@ body {
         font-size: 0.65rem;
     }
 }
+
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 2px;
+    width: 100%;
+}
+
 </style>
 
 {% endblock %}
