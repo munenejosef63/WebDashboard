@@ -113,28 +113,43 @@
             color: var(--primary-color);
         }
 
-        .section-navigation {
-            display: flex;
-            gap: 8px;
+        /* NEW: Navigation container */
+        .nav-container {
             background: #f8f9fa;
-            padding: 8px;
-            border-radius: 12px;
-            flex-wrap: wrap;
-            border: 1px solid #dee2e6;
+            padding: 8px 2.5rem;
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 70px; /* Height of header */
+            z-index: 99;
+            overflow-x: auto;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .section-navigation {
+            display: inline-flex;
+            gap: 8px;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            flex-wrap: nowrap;
+            border: none;
+            min-width: 100%;
         }
 
         .section-navigation .nav-button {
-            padding: 10px 6px;
+            padding: 10px 16px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             text-align: center;
             transition: all 0.2s ease;
             text-decoration: none;
-            display: block;
+            display: inline-block;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .section-navigation .nav-button:hover {
@@ -278,18 +293,18 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center; /* Changed to center vertically */
             align-items: center;
             text-align: center;
             min-height: 0;
             position: relative;
             text-decoration: none;
+            gap: 10px; /* Added for consistent spacing */
         }
 
         .link-title {
             font-size: 0.8rem;
             font-weight: 700;
-            margin-bottom: 10px;
             color: #212529;
             line-height: 1.4;
             overflow-wrap: anywhere;
@@ -298,14 +313,26 @@
             max-width: 100%;
             padding: 0 5px;
             transition: color 0.3s ease;
+            margin: 0; /* Removed margin for better centering */
         }
 
         .link-description {
             font-size: 0.85rem;
             color: #6c757d;
             line-height: 1.5;
-            margin-bottom: 12px;
             transition: color 0.3s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Limit to 2 lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            margin: 0; /* Removed margin for better centering */
+        }
+
+        /* Hide description element if empty */
+        .link-description:empty {
+            display: none;
         }
 
         .status-badge {
@@ -322,22 +349,6 @@
             transition: var(--transition);
             border: 1px solid transparent;
         }
-
-        .badge-static {
-            background: rgba(6, 214, 160, 0.15);
-            color: var(--success-color);
-        }
-
-        .badge-urgent {
-            background: rgba(239, 71, 111, 0.15);
-            color: var(--danger-color);
-        }
-
-        .badge-unknown {
-            background: rgba(108, 117, 125, 0.15);
-            color: var(--secondary-color);
-        }
-
         .link-button:hover .badge-static {
             background: rgba(6, 214, 160, 0.25);
             transform: translateX(5px);
@@ -617,15 +628,15 @@
                 font-size: 1.2rem;
             }
 
-            .section-navigation {
-                width: 100%;
-                overflow-x: auto;
-                padding: 5px;
+            /* NEW: Adjust navigation container for mobile */
+            .nav-container {
+                padding: 8px 1.5rem;
+                top: 120px; /* Adjusted for mobile header height */
             }
 
             .section-navigation .nav-button {
-                padding: 8px 16px;
-                font-size: 0.6rem;
+                padding: 8px 12px;
+                font-size: 0.7rem;
             }
 
             .links-grid {
@@ -633,8 +644,8 @@
                 gap: 15px;
             }
             .link-button {
-        min-height: 100px;
-    }
+                min-height: 100px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -652,6 +663,11 @@
 
             .modal-content {
                 padding: 20px;
+            }
+
+            /* NEW: Adjust navigation for small screens */
+            .nav-container {
+                top: 140px; /* Adjusted for small screens */
             }
         }
 
@@ -673,6 +689,13 @@
             </a>
             <div class="section-title">{{ current_section.name }}</div>
         </div>
+        <a href="{{ url_for('auth.logout') }}" class="main-dashboard-btn">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+
+    <!-- NEW: Navigation container below header -->
+    <div class="nav-container">
         <nav class="section-navigation">
             {% for section in sections %}
                 <a href="{{ url_for('main.dashboard_section', section_name=section.name) }}"
@@ -681,9 +704,6 @@
                 </a>
             {% endfor %}
         </nav>
-        <a href="{{ url_for('auth.logout') }}" class="main-dashboard-btn">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
     </div>
 
     <div class="dashboard-content">
@@ -700,7 +720,6 @@
             <a href="{{ row.url }}" target="_blank" class="link-content">
                 <div class="link-title">{{ row.title }}</div>
                 <div class="link-description">{{ row.description or '' }}</div>
-                <div class="status-badge badge-{{ row.status }}">{{ row.status|capitalize }}</div>
             </a>
             <button class="delete-btn" title="Delete Link" data-link-id="{{ row.id }}">
                 <i class="bi bi-trash"></i>
