@@ -615,3 +615,57 @@ def delete_link(link_id):
             "status": "error",
             "message": "System error deleting link"
         }), 500
+
+
+@main_bp.route('/delete_section', methods=['POST'])
+@login_required
+def delete_section():
+    try:
+        # Get JSON data from request
+        data = request.get_json()
+        section_id = data.get('section_id')
+
+        if not section_id:
+            return jsonify({"success": False, "error": "Missing section ID"}), 400
+
+        try:
+            section_id = int(section_id)
+        except ValueError:
+            return jsonify({"success": False, "error": "Invalid section ID"}), 400
+
+        # Verify section ownership
+        section = Sheet.query \
+            .join(Spreadsheet) \
+            .filter(
+            Sheet.id == section_id,
+            Spreadsheet.user_id == current_user.id
+        ).first()
+
+        if not section:
+            return jsonify({"success": False, "error": "Section not found or access denied"}), 404
+
+        # Delete all links in the section
+        Link.query.filter_by(sheet_id=section.id).delete()
+
+        # Delete the section
+        db.session.delete(section)
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Section and all its records deleted successfully"
+        }), 200
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        current_app.logger.error(f"Database error deleting section: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Database operation failed"
+        }), 500
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error deleting section: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Internal server error"
+        }), 500

@@ -34,6 +34,10 @@
             <a href="#" class="action-link" id="add-new-section-btn">
                 Add New Section <i class="bi bi-folder-plus"></i>
             </a>
+
+            <a href="#" class="action-link text-danger" id="delete-section-btn">
+                 Delete Section <i class="bi bi-trash"></i>
+            </a>
             <!-- Moved Quick Stats to action container -->
             <div class="quick-stats-container">
                 <div class="stat-item">
@@ -69,97 +73,136 @@
         </div>
     </div>
 
-    <!-- Upload Modal -->
-    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="uploadModalLabel">
-                        <i class="bi bi-upload me-2"></i>Upload New File
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="modalUploadForm" action="/upload" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="mb-3">
-                            <label for="modalFileInput" class="form-label">Select file to upload</label>
-                            <input type="file"
-                                   class="form-control"
-                                   id="modalFileInput"
-                                   name="file"
-                                   accept=".csv, .xls, .xlsx"
-                                   required>
-                            <div class="form-text mt-2">
-                                Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
-                            </div>
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">
+                    <i class="bi bi-upload me-2"></i>Upload New File
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="modalUploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="mb-3">
+                        <label for="modalFileInput" class="form-label">Select file to upload</label>
+                        <input type="file"
+                            class="form-control"
+                            id="modalFileInput"
+                            name="file"
+                            accept=".csv, .xls, .xlsx"
+                            required>
+                        <div class="form-text mt-2">
+                            Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
                         </div>
-                        <div id="modal-upload-progress-container" class="mt-3" style="display: none;">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span id="modal-upload-status">Status: Preparing upload...</span>
-                                <span id="modal-upload-percentage">0%</span>
-                            </div>
-                            <div class="progress">
-                                <div id="modal-upload-progress" class="progress-bar progress-bar-striped progress-bar-animated"
-                                     role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <div id="modal-upload-success-message" class="mt-3 text-success" style="display: none;"></div>
+                    </div>
+                    <div id="modal-upload-progress-container" class="mt-3" style="display: none;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span id="modal-upload-status">Status: Preparing upload...</span>
+                            <span id="modal-upload-percentage">0%</span>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="modal-upload-submit">
-                        <i class="bi bi-upload me-1"></i>Upload File
-                    </button>
-                </div>
+                        <div class="progress">
+                            <div id="modal-upload-progress" class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div id="modal-upload-success-message" class="mt-3 text-success" style="display: none;"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="modal-upload-submit">
+                    <i class="bi bi-upload me-1"></i>Upload File
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- New Section Modal -->
-    <div class="modal fade" id="sectionModal" tabindex="-1" aria-labelledby="sectionModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="sectionModalLabel">
-                        <i class="bi bi-folder-plus me-2"></i>Create New Section
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="modalSectionForm">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="mb-3">
-                            <label for="modalSpreadsheetSelect" class="form-label">Select Spreadsheet</label>
-                            <select class="form-select" id="modalSpreadsheetSelect" required>
-                                <option value="" disabled selected>Choose spreadsheet...</option>
-                                {% for spreadsheet in spreadsheets %}
-                                    <option value="{{ spreadsheet.id }}">{{ spreadsheet.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalSectionName" class="form-label">Section Name</label>
-                            <input type="text" class="form-control" id="modalSectionName"
-                                   placeholder="Enter section name" required>
-                            <div id="modal-section-name-error" class="invalid-feedback" style="display: none;"></div>
-                        </div>
-                        <div id="section-success-message" class="mt-3 text-success" style="display: none;"></div>
-                        <div id="section-error-message" class="mt-3 text-danger" style="display: none;"></div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="modal-section-submit">
-                        <span id="section-submit-text">Create Section</span>
-                        <span id="section-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-                    </button>
-                </div>
+<!-- New Section Modal -->
+<div class="modal fade" id="sectionModal" tabindex="-1" aria-labelledby="sectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sectionModalLabel">
+                    <i class="bi bi-folder-plus me-2"></i>Create New Section
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="modalSectionForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="mb-3">
+                        <label for="modalSpreadsheetSelect" class="form-label">Select Spreadsheet</label>
+                        <select class="form-select" id="modalSpreadsheetSelect" required>
+                            <option value="" disabled selected>Choose spreadsheet...</option>
+                            {% for spreadsheet in spreadsheets %}
+                                <option value="{{ spreadsheet.id }}">{{ spreadsheet.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalSectionName" class="form-label">Section Name</label>
+                        <input type="text" class="form-control" id="modalSectionName"
+                            placeholder="Enter section name" required>
+                        <div id="modal-section-name-error" class="invalid-feedback" style="display: none;"></div>
+                    </div>
+                    <div id="section-success-message" class="mt-3 text-success" style="display: none;"></div>
+                    <div id="section-error-message" class="mt-3 text-danger" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="modal-section-submit">
+                    <span id="section-submit-text">Create Section</span>
+                    <span id="section-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
+<!-- Delete Section Modal -->
+<div class="modal fade" id="deleteSectionModal" tabindex="-1" aria-labelledby="deleteSectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="deleteSectionModalLabel">
+                    <i class="bi bi-trash me-2"></i>Delete Section
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="modalDeleteForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="mb-3">
+                        <label for="deleteSectionSelect" class="form-label">Select Section to Delete</label>
+                        <select class="form-select" id="deleteSectionSelect" required>
+                            <option value="" disabled selected>Choose section...</option>
+                            {% for section in sections %}
+                                <option value="{{ section.id }}">{{ section.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Warning: This will permanently delete the section and all its records!
+                    </div>
+                    <div id="delete-error-message" class="mt-3 text-danger" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="modal-delete-submit">
+                    <span id="delete-submit-text">Delete Section</span>
+                    <span id="delete-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Dashboard Layout -->
     <div class="dashboard-layout">
         <!-- Left Sidebar - Replaced with image -->
@@ -212,678 +255,782 @@
 </div>
 
 <script>
-    // Initialize modals
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get modals
-        const uploadModal = new bootstrap.Modal(document.getElementById('uploadModal'));
-        const sectionModal = new bootstrap.Modal(document.getElementById('sectionModal'));
-
-        // Get buttons
-        const addNewFileBtn = document.getElementById('add-new-file-btn');
-        const addNewSectionBtn = document.getElementById('add-new-section-btn');
-        const modalUploadSubmit = document.getElementById('modal-upload-submit');
-        const modalSectionSubmit = document.getElementById('modal-section-submit');
-
-        // File upload functionality
-        addNewFileBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            uploadModal.show();
-        });
-
-        // Section creation functionality
-        addNewSectionBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            // Reset form
-            document.getElementById('modalSectionForm').reset();
-            document.getElementById('section-success-message').style.display = 'none';
-            document.getElementById('section-error-message').style.display = 'none';
-            sectionModal.show();
-        });
-
-        // Handle file upload form submission
-        modalUploadSubmit.addEventListener('click', handleFileUpload);
-
-        // Handle section creation form submission
-        modalSectionSubmit.addEventListener('click', handleSectionCreation);
-
-        // File upload handler
-        function handleFileUpload() {
-            const modalFileInput = document.getElementById('modalFileInput');
-            const modalUploadForm = document.getElementById('modalUploadForm');
-
-            if (!modalFileInput.value) {
-                modalFileInput.click();
-                return;
-            }
-
-            modalUploadForm.dispatchEvent(new Event('submit'));
-        }
-
-        // Section creation handler
-        function handleSectionCreation() {
-            const spreadsheetSelect = document.getElementById('modalSpreadsheetSelect');
-            const sectionNameInput = document.getElementById('modalSectionName');
-            const errorMessage = document.getElementById('modal-section-name-error');
-            const successMessage = document.getElementById('section-success-message');
-            const errorContainer = document.getElementById('section-error-message');
-            const submitText = document.getElementById('section-submit-text');
-            const spinner = document.getElementById('section-spinner');
-
-            // Reset messages
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-            errorContainer.style.display = 'none';
-            sectionNameInput.classList.remove('is-invalid');
-
-            // Validate inputs
-            if (!spreadsheetSelect.value) {
-                errorContainer.textContent = 'Please select a spreadsheet';
-                errorContainer.style.display = 'block';
-                return;
-            }
-
-            if (!sectionNameInput.value.trim()) {
-                errorMessage.textContent = 'Section name is required';
-                errorMessage.style.display = 'block';
-                sectionNameInput.classList.add('is-invalid');
-                return;
-            }
-
-            // Show loading state
-            submitText.style.display = 'none';
-            spinner.style.display = 'inline-block';
-            modalSectionSubmit.disabled = true;
-
-            // Prepare data
-            const formData = new FormData();
-            formData.append('spreadsheet_id', spreadsheetSelect.value);
-            formData.append('section_name', sectionNameInput.value.trim());
-            formData.append('csrf_token', '{{ csrf_token() }}');
-
-            // Get create section URL from hidden element
-            const createSectionUrl = document.getElementById('app-urls').dataset.createSectionUrl;
-
-            // Send request
-            fetch(createSectionUrl, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-CSRFToken': csrfToken  // Add CSRF token header
-    },
-    body: new URLSearchParams({
-        'spreadsheet_id': spreadsheetSelect.value,
-        'name': sectionNameInput.value.trim()
-    })
-})
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    successMessage.textContent = 'Section created successfully!';
-                    successMessage.style.display = 'block';
-
-                    // Close modal after 1.5 seconds
-                    setTimeout(() => {
-                        sectionModal.hide();
-                        // Reload page to show new section
-                        setTimeout(() => location.reload(), 500);
-                    }, 1500);
-                } else {
-                    throw new Error(data.error || 'Failed to create section');
-                }
-            })
-            .catch(error => {
-                errorContainer.textContent = error.message || 'An error occurred while creating the section';
-                errorContainer.style.display = 'block';
-            })
-            .finally(() => {
-                // Reset button state
-                submitText.style.display = 'inline';
-                spinner.style.display = 'none';
-                modalSectionSubmit.disabled = false;
-            });
-        }
-
-        // File upload form submission handler
-        const modalUploadForm = document.getElementById('modalUploadForm');
-        modalUploadForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Show progress container
-            document.getElementById('modal-upload-progress-container').style.display = 'block';
-
-            // Create FormData object
-            const formData = new FormData(this);
-
-            // AJAX request to upload file
-            const xhr = new XMLHttpRequest();
-
-            // Progress update
-            xhr.upload.addEventListener('progress', function(e) {
-                if (e.lengthComputable) {
-                    const percentComplete = (e.loaded / e.total) * 100;
-                    document.getElementById('modal-upload-progress').style.width = percentComplete + '%';
-                    document.getElementById('modal-upload-percentage').textContent = Math.round(percentComplete) + '%';
-                    document.getElementById('modal-upload-status').textContent = 'Status: Uploading...';
-                }
-            });
-
-            // Load complete
-            xhr.addEventListener('load', function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    // Success
-                    document.getElementById('modal-upload-status').textContent = 'Status: Upload complete!';
-                    document.getElementById('modal-upload-success-message').textContent =
-                        'File uploaded successfully! Processing...';
-                    document.getElementById('modal-upload-success-message').style.display = 'block';
-
-                    // Close modal after 2 seconds
-                    setTimeout(() => {
-                        uploadModal.hide();
-                        // Reload page after a delay to show new file
-                        setTimeout(() => location.reload(), 1000);
-                    }, 2000);
-                } else {
-                    // Error
-                    document.getElementById('modal-upload-status').textContent =
-                        'Error: ' + (xhr.responseText || 'Upload failed');
-                }
-            });
-
-            // Error handling
-            xhr.addEventListener('error', function() {
-                document.getElementById('modal-upload-status').textContent = 'Error: Upload failed';
-            });
-
-            // Send request
-            xhr.open('POST', this.action, true);
-            xhr.send(formData);
-        });
-
-        // Reset upload modal when closed
-        document.getElementById('uploadModal').addEventListener('hidden.bs.modal', function() {
-            modalUploadForm.reset();
-            document.getElementById('modal-upload-progress-container').style.display = 'none';
-            document.getElementById('modal-upload-progress').style.width = '0%';
-            document.getElementById('modal-upload-percentage').textContent = '0%';
-            document.getElementById('modal-upload-status').textContent = 'Status: Preparing upload...';
-            document.getElementById('modal-upload-success-message').style.display = 'none';
-        });
-
-        // Reset section modal when closed
-        document.getElementById('sectionModal').addEventListener('hidden.bs.modal', function() {
-            document.getElementById('modalSectionForm').reset();
-            document.getElementById('modal-section-name-error').style.display = 'none';
-            document.getElementById('section-success-message').style.display = 'none';
-            document.getElementById('section-error-message').style.display = 'none';
-            document.getElementById('modalSectionName').classList.remove('is-invalid');
-
-            // Reset button state
-            document.getElementById('section-submit-text').style.display = 'inline';
-            document.getElementById('section-spinner').style.display = 'none';
-            document.getElementById('modal-section-submit').disabled = false;
-        });
-
-        // Get CSRF token dynamically
+document.addEventListener('DOMContentLoaded', function() {
+    // Get CSRF token once
     const csrfToken = document.querySelector('#modalSectionForm input[name="csrf_token"]').value;
 
-    // Use URLSearchParams instead of FormData
-    const params = new URLSearchParams();
-    params.append('spreadsheet_id', spreadsheetSelect.value);
-    params.append('section_name', sectionNameInput.value.trim());
-    params.append('csrf_token', csrfToken);
+    // Initialize modals
+    const uploadModal = new bootstrap.Modal(document.getElementById('uploadModal'));
+    const sectionModal = new bootstrap.Modal(document.getElementById('sectionModal'));
+    const deleteSectionModal = new bootstrap.Modal(document.getElementById('deleteSectionModal'));
 
-    fetch(createSectionUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: params
-    })
+    // Get buttons
+    const addNewFileBtn = document.getElementById('add-new-file-btn');
+    const addNewSectionBtn = document.getElementById('add-new-section-btn');
+    const deleteSectionBtn = document.getElementById('delete-section-btn');
+    const modalUploadSubmit = document.getElementById('modal-upload-submit');
+    const modalSectionSubmit = document.getElementById('modal-section-submit');
+    const modalDeleteSubmit = document.getElementById('modal-delete-submit');
 
+    // File upload functionality
+    addNewFileBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        uploadModal.show();
     });
+
+    // Section creation functionality
+    addNewSectionBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Reset form
+        document.getElementById('modalSectionForm').reset();
+        document.getElementById('section-success-message').style.display = 'none';
+        document.getElementById('section-error-message').style.display = 'none';
+        sectionModal.show();
+    });
+
+    // Delete section functionality
+    deleteSectionBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Reset form
+        document.getElementById('modalDeleteForm').reset();
+        document.getElementById('delete-error-message').style.display = 'none';
+        deleteSectionModal.show();
+    });
+
+    // Handle file upload form submission
+    modalUploadSubmit.addEventListener('click', handleFileUpload);
+
+    // Handle section creation form submission
+    modalSectionSubmit.addEventListener('click', handleSectionCreation);
+
+    // Handle delete section form submission
+    modalDeleteSubmit.addEventListener('click', handleSectionDeletion);
+
+    // File upload handler
+    function handleFileUpload() {
+        const modalFileInput = document.getElementById('modalFileInput');
+        const modalUploadForm = document.getElementById('modalUploadForm');
+
+        if (!modalFileInput.value) {
+            modalFileInput.click();
+            return;
+        }
+
+        modalUploadForm.dispatchEvent(new Event('submit'));
+    }
+
+    // Section creation handler
+    function handleSectionCreation() {
+        const spreadsheetSelect = document.getElementById('modalSpreadsheetSelect');
+        const sectionNameInput = document.getElementById('modalSectionName');
+        const errorMessage = document.getElementById('modal-section-name-error');
+        const successMessage = document.getElementById('section-success-message');
+        const errorContainer = document.getElementById('section-error-message');
+        const submitText = document.getElementById('section-submit-text');
+        const spinner = document.getElementById('section-spinner');
+
+        // Reset messages
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+        errorContainer.style.display = 'none';
+        sectionNameInput.classList.remove('is-invalid');
+
+        // Validate inputs
+        if (!spreadsheetSelect.value) {
+            errorContainer.textContent = 'Please select a spreadsheet';
+            errorContainer.style.display = 'block';
+            return;
+        }
+
+        if (!sectionNameInput.value.trim()) {
+            errorMessage.textContent = 'Section name is required';
+            errorMessage.style.display = 'block';
+            sectionNameInput.classList.add('is-invalid');
+            return;
+        }
+
+        // Show loading state
+        submitText.style.display = 'none';
+        spinner.style.display = 'inline-block';
+        modalSectionSubmit.disabled = true;
+
+        // Get create section URL from hidden element
+        const createSectionUrl = document.getElementById('app-urls').dataset.createSectionUrl;
+
+        // Send request
+        fetch(createSectionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: new URLSearchParams({
+                'spreadsheet_id': spreadsheetSelect.value,
+                'name': sectionNameInput.value.trim()
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                successMessage.textContent = 'Section created successfully!';
+                successMessage.style.display = 'block';
+
+                // Close modal after 1.5 seconds
+                setTimeout(() => {
+                    sectionModal.hide();
+                    // Reload page to show new section
+                    setTimeout(() => location.reload(), 500);
+                }, 1500);
+            } else {
+                throw new Error(data.error || 'Failed to create section');
+            }
+        })
+        .catch(error => {
+            errorContainer.textContent = error.message || 'An error occurred while creating the section';
+            errorContainer.style.display = 'block';
+        })
+        .finally(() => {
+            // Reset button state
+            submitText.style.display = 'inline';
+            spinner.style.display = 'none';
+            modalSectionSubmit.disabled = false;
+        });
+    }
+
+    // Section deletion handler
+    function handleSectionDeletion() {
+        const sectionSelect = document.getElementById('deleteSectionSelect');
+        const errorContainer = document.getElementById('delete-error-message');
+        const submitText = document.getElementById('delete-submit-text');
+        const spinner = document.getElementById('delete-spinner');
+
+        // Reset messages
+        errorContainer.style.display = 'none';
+
+        // Validate input
+        if (!sectionSelect.value) {
+            errorContainer.textContent = 'Please select a section to delete';
+            errorContainer.style.display = 'block';
+            return;
+        }
+
+        // Show loading state
+        submitText.style.display = 'none';
+        spinner.style.display = 'inline-block';
+        modalDeleteSubmit.disabled = true;
+
+        // Get delete section URL
+        const deleteSectionUrl = "{{ url_for('main.delete_section') }}";
+
+        // Get CSRF token specifically from delete form
+        const deleteCsrfToken = document.querySelector('#modalDeleteForm input[name="csrf_token"]').value;
+
+        // Send request with proper CSRF handling
+        fetch(deleteSectionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': deleteCsrfToken
+            },
+            body: JSON.stringify({
+                'section_id': sectionSelect.value
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Close modal and reload
+                deleteSectionModal.hide();
+                setTimeout(() => location.reload(), 500);
+            } else {
+                throw new Error(data.error || 'Failed to delete section');
+            }
+        })
+        .catch(error => {
+            errorContainer.textContent = error.message || 'An error occurred while deleting the section';
+            errorContainer.style.display = 'block';
+        })
+        .finally(() => {
+            // Reset button state
+            submitText.style.display = 'inline';
+            spinner.style.display = 'none';
+            modalDeleteSubmit.disabled = false;
+        });
+    }
+
+    // File upload form submission handler
+    const modalUploadForm = document.getElementById('modalUploadForm');
+    modalUploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Show progress container
+        document.getElementById('modal-upload-progress-container').style.display = 'block';
+
+        // Create FormData object
+        const formData = new FormData(this);
+
+        // AJAX request to upload file
+        const xhr = new XMLHttpRequest();
+
+        // Progress update
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const percentComplete = (e.loaded / e.total) * 100;
+                document.getElementById('modal-upload-progress').style.width = percentComplete + '%';
+                document.getElementById('modal-upload-percentage').textContent = Math.round(percentComplete) + '%';
+                document.getElementById('modal-upload-status').textContent = 'Status: Uploading...';
+            }
+        });
+
+        // Load complete
+        xhr.addEventListener('load', function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                // Success
+                document.getElementById('modal-upload-status').textContent = 'Status: Upload complete!';
+                document.getElementById('modal-upload-success-message').textContent =
+                    'File uploaded successfully! Processing...';
+                document.getElementById('modal-upload-success-message').style.display = 'block';
+
+                // Close modal after 2 seconds
+                setTimeout(() => {
+                    uploadModal.hide();
+                    // Reload page after a delay to show new file
+                    setTimeout(() => location.reload(), 1000);
+                }, 2000);
+            } else {
+                // Error
+                document.getElementById('modal-upload-status').textContent =
+                    'Error: ' + (xhr.responseText || 'Upload failed');
+            }
+        });
+
+        // Error handling
+        xhr.addEventListener('error', function() {
+            document.getElementById('modal-upload-status').textContent = 'Error: Upload failed';
+        });
+
+        // Send request
+        xhr.open('POST', this.action, true);
+        xhr.send(formData);
+    });
+
+    // Reset upload modal when closed
+    document.getElementById('uploadModal').addEventListener('hidden.bs.modal', function() {
+        modalUploadForm.reset();
+        document.getElementById('modal-upload-progress-container').style.display = 'none';
+        document.getElementById('modal-upload-progress').style.width = '0%';
+        document.getElementById('modal-upload-percentage').textContent = '0%';
+        document.getElementById('modal-upload-status').textContent = 'Status: Preparing upload...';
+        document.getElementById('modal-upload-success-message').style.display = 'none';
+    });
+
+    // Reset section modal when closed
+    document.getElementById('sectionModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('modalSectionForm').reset();
+        document.getElementById('modal-section-name-error').style.display = 'none';
+        document.getElementById('section-success-message').style.display = 'none';
+        document.getElementById('section-error-message').style.display = 'none';
+        document.getElementById('modalSectionName').classList.remove('is-invalid');
+
+        // Reset button state
+        document.getElementById('section-submit-text').style.display = 'inline';
+        document.getElementById('section-spinner').style.display = 'none';
+        document.getElementById('modal-section-submit').disabled = false;
+    });
+
+    // Reset delete modal when closed
+    document.getElementById('deleteSectionModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('modalDeleteForm').reset();
+        document.getElementById('delete-error-message').style.display = 'none';
+
+        // Reset button state
+        document.getElementById('delete-submit-text').style.display = 'inline';
+        document.getElementById('delete-spinner').style.display = 'none';
+        document.getElementById('modal-delete-submit').disabled = false;
+    });
+});
 </script>
 
+
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    :root {
-        --sidebar-width: 30%;
-        --main-width: 40%;
-        --gap-size: 20px;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    body {
-        font-family: 'Inter', sans-serif;
-        line-height: 1.6;
-        padding-top: 80px; /* Add padding to body for fixed header */
-    }
+:root {
+    --sidebar-width: 30%;
+    --main-width: 40%;
+    --gap-size: 20px;
+}
 
-    .dashboard-header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background-color: #F0FFFF;
-        padding: 15px;
-        z-index: 1000;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        height: 60px; /* Fixed height for header */
-    }
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    padding-top: 80px; /* Padding for fixed header */
+}
 
-    .dashboard-layout {
-        margin-top: 0; /* Removed margin-top since body has padding */
-    }
+/* ===== DASHBOARD HEADER ===== */
+.dashboard-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #F0FFFF;
+    padding: 15px;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    height: 60px;
+}
 
-    .dashboard-header h1 {
-        font-size: 1.0rem;
-        font-weight: 600;
-        margin: 0;
-        color: #2c3e50;
-        font-family: 'Inter', sans-serif;
-    }
+.dashboard-header h1 {
+    font-size: 1.0rem;
+    font-weight: 600;
+    margin: 0;
+    color: #2c3e50;
+}
 
-    .logout-btn {
-        font-size: 0.9rem;
-        padding: 0.5rem 1rem;
-    }
+.logout-btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
 
-    .dashboard-layout {
-        display: grid;
-        grid-template-columns: var(--sidebar-width) var(--main-width) var(--sidebar-width);
-        gap: var(--gap-size);
-        width: 100%;
-    }
+/* ===== DASHBOARD LAYOUT ===== */
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) var(--main-width) var(--sidebar-width);
+    gap: var(--gap-size);
+    width: 100%;
+    margin-top: 0;
+}
 
-    .sidebar {
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        border: 1px solid #eaeaea;
-    }
+.sidebar {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
+}
 
-    /* Left sidebar image styling */
-    .left-sidebar {
-        padding: 0;
-        display: flex;
-    }
+.left-sidebar {
+    padding: 0;
+    display: flex;
+}
 
-    .sidebar-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 10px;
-    }
+.sidebar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
 
-    .sidebar-card {
-        margin-bottom: 1.5rem;
-    }
+.sidebar-card {
+    margin-bottom: 1.5rem;
+}
 
-    .sidebar-card-header {
-        margin-bottom: 1rem;
-    }
+.sidebar-card-header {
+    margin-bottom: 1rem;
+}
 
-    .sidebar-title {
-        font-size: 1.6rem;
-        font-weight: 500;
-        color: #34495e;
-        margin: 0 0 15px 0;
-        display: flex;
-        align-items: center;
-        font-family: 'Inter', sans-serif;
-    }
+.sidebar-title {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #34495e;
+    margin: 0 0 15px 0;
+    display: flex;
+    align-items: center;
+}
 
-    .horizontal-section-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-        padding: 0;
-    }
+.horizontal-section-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0;
+}
 
-    .section-pill {
-        display: inline-block;
-        padding: 8px 12px;
-        background: #1677FF;
-        border-radius: 20px;
-        color: #FFFFFF;
-        text-decoration: none;
-        font-size: 12px;
-        transition: all 0.2s ease;
-        border: 1px solid #e2e8f0;
-        margin: 2px;
-    }
+.section-pill {
+    display: inline-block;
+    padding: 8px 12px;
+    background: #1677FF;
+    border-radius: 20px;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    margin: 2px;
+}
 
-    .main-content {
-        background: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        border: 1px solid #eaeaea;
-    }
+.main-content {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
+}
 
-    .form-card {
-        margin-bottom: 1.5rem;
-    }
+.form-card {
+    margin-bottom: 1.5rem;
+}
 
-    .card-header h3 {
-        font-size: 24px;
-        font-weight: 500;
-        color: #34495e;
-        display: flex;
-        align-items: center;
-    }
+.card-header h3 {
+    font-size: 24px;
+    font-weight: 500;
+    color: #34495e;
+    display: flex;
+    align-items: center;
+}
 
-    .form-label {
-        font-weight: 500;
-        color: #334155;
-        margin-bottom: 0.5rem;
-        font-size: 18px;
-        font-family: 'Inter', sans-serif;
-    }
+.form-label {
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    font-size: 18px;
+}
 
-    .form-control, .form-select {
-        padding: 0.6rem 0.75rem;
-        font-size: 18px;
-    }
+.form-control,
+.form-select {
+    padding: 0.6rem 0.75rem;
+    font-size: 18px;
+}
 
-    #upload-success-message {
-        font-weight: 500;
-        font-size: 1.1rem;
-        animation: fadeIn 0.5s ease-in;
-    }
+#upload-success-message {
+    font-weight: 500;
+    font-size: 1.1rem;
+    animation: fadeIn 0.5s ease-in;
+}
 
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-    /* Action Bar Styles - FIXED POSITIONING */
-    .action-bar {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-        padding: 0.8rem 1.5rem;
-        top: 60px; /* Below the header */
-        left: 0;
-        right: 0;
-        z-index: 999; /* Below header but above content */
-        display: flex;
-        justify-content: center;
-    }
+/* ===== ACTION BAR ===== */
+.action-bar {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.8rem 1.5rem;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+}
 
-    .action-container {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        max-width: 1400px;
-        width: 100%;
-        margin: 0 auto;
-    }
+.action-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+}
 
-    .action-title {
-        font-weight: 600;
-        font-size: 0.8rem;
-        color: #495057;
-        margin-right: 1.5rem;
-        font-family: 'Inter', sans-serif;
-        white-space: nowrap;
-    }
+.action-title {
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #495057;
+    margin-right: 1.5rem;
+    white-space: nowrap;
+}
 
-    .action-link {
-        display: flex;
-        align-items: center;
-        color: #0d6efd;
-        text-decoration: none;
-        font-size: 0.8rem;
-        transition: all 0.2s ease;
-        padding: 0.4rem 0.8rem;
-        border-radius: 4px;
-        font-family: 'Inter', sans-serif;
-        white-space: nowrap;
-    }
+.action-link {
+    display: flex;
+    align-items: center;
+    color: #0d6efd;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    white-space: nowrap;
+}
 
-    .action-link:hover {
-        background-color: #e9ecef;
-        text-decoration: none;
-        color: #0a58ca;
-    }
+.action-link:hover {
+    background-color: #e9ecef;
+    text-decoration: none;
+    color: #0a58ca;
+}
 
-    .action-link i {
-        margin-left: 0.4rem;
-        font-size: 0.8rem;
-    }
+.action-link.text-danger {
+    color: #dc3545 !important;
+}
 
-    /* Quick Stats Container in Action Bar */
-    .quick-stats-container {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        margin-left: auto; /* Push to the right end */
-        padding: 0 10px;
-    }
+.action-link.text-danger:hover {
+    color: #bd2130 !important;
+    background-color: rgba(220, 53, 69, 0.1);
+}
 
-    .stat-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: #ffffff;
-        border-radius: 8px;
-        padding: 8px 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-    }
+.action-link i {
+    margin-left: 0.4rem;
+    font-size: 0.8rem;
+}
 
-    .stat-icon-wrapper {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-    }
+/* ===== QUICK STATS ===== */
+.quick-stats-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-left: auto;
+    padding: 0 10px;
+}
 
-    .stat-content {
-        display: flex;
-        flex-direction: column;
-    }
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
 
-    .stat-label {
-        font-size: 0.75rem;
-        color: #64748b;
-        letter-spacing: 0.5px;
-        font-family: 'Inter', sans-serif;
-        white-space: nowrap;
-    }
+.stat-icon-wrapper {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
 
-    .stat-value {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: #1e293b;
-    }
+.stat-content {
+    display: flex;
+    flex-direction: column;
+}
 
-    .bg-primary { background: #3b82f6; }
-    .bg-success { background: #10b981; }
-    .bg-info { background: #06b6d4; }
+.stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
 
-    /* Modal adjustments */
-    .modal-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-    }
+.stat-value {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1e293b;
+}
 
-    .modal-title {
-        font-weight: 500;
-    }
+.bg-primary { background: #3b82f6; }
+.bg-success { background: #10b981; }
+.bg-info { background: #06b6d4; }
 
-    .modal-footer {
-        border-top: 1px solid #dee2e6;
-    }
+/* ===== MODAL STYLES ===== */
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
 
-    /* Section modal specific styles */
-    #section-spinner {
-        margin-left: 8px;
-        vertical-align: middle;
-    }
+.modal-title {
+    font-weight: 500;
+}
 
-    /* Section creation form in main content */
-    .section-creation-container {
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-    }
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+}
 
-    .section-creation-container .card-header {
-        background: linear-gradient(135deg, #6c5ce7, #a8a4e6);
-        color: white;
-        border-radius: 8px 8px 0 0;
-    }
+#section-spinner,
+#delete-spinner {
+    margin-left: 8px;
+    vertical-align: middle;
+}
 
-    .invalid-feedback {
-        display: none;
-        width: 100%;
-        margin-top: 0.25rem;
-        font-size: 0.875em;
-        color: #dc3545;
-    }
+.invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
 
-  /* Footer styles - Horizontal layout */
-    .footer-container {
-        background-color: #f8f9fa;
-        border-top: 1px solid #dee2e6;
-        padding: 20px 0;
-        margin-top: 40px;
-    }
+/* ===== FOOTER ===== */
+.footer-container {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 20px 0;
+    margin-top: 40px;
+}
 
+.footer-content {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 30px;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.logo-image {
+    height: 30px;
+    width: auto;
+}
+
+.copyright {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+}
+
+.footer-links span {
+    color: #495057;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 1200px) {
     .footer-content {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        align-items: center;
-        justify-content: center;
-        max-width: 1200px;
-        margin: 0 auto;
-        gap: 30px;
-    }
-
-    .footer-logo {
-        display: flex;
-        align-items: center;
-        margin: 0;
-    }
-
-    .logo-image {
-        height: 30px;
-        width: auto;
-    }
-
-    .copyright {
-        color: #6c757d;
-        font-size: 0.9rem;
-        margin: 0;
-        white-space: nowrap;
+        gap: 20px;
     }
 
     .footer-links {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 20px;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 992px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr;
     }
 
+    .footer-content {
+        gap: 15px;
+    }
+
+    .footer-links {
+        gap: 12px;
+    }
+
+    .logo-image {
+        height: 25px;
+    }
+
+    .copyright,
     .footer-links span {
-        color: #495057;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .action-container {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .quick-stats-container {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 12px;
+        padding: 0 15px;
+    }
+
+    .footer-links {
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .logo-image {
+        height: 22px;
+    }
+
+    .copyright,
+    .footer-links span {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .action-title {
+        display: none;
+    }
+
+    .action-link {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+
+    .stat-item {
+        padding: 6px 8px;
+    }
+
+    .footer-content {
+        gap: 8px;
+        padding: 0 10px;
+    }
+
+    .footer-links {
+        gap: 8px;
+    }
+
+    .logo-image {
+        height: 20px;
+    }
+
+    .copyright,
+    .footer-links span {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header h1 {
         font-size: 0.9rem;
-        white-space: nowrap;
     }
 
-    /* Responsive adjustments for footer */
-    @media (max-width: 1200px) {
-        .footer-content {
-            gap: 20px;
-        }
-
-        .footer-links {
-            gap: 15px;
-        }
+    .stat-item {
+        flex-direction: column;
+        text-align: center;
     }
 
-    @media (max-width: 992px) {
-        .footer-content {
-            gap: 15px;
-        }
-
-        .footer-links {
-            gap: 12px;
-        }
-
-        .logo-image {
-            height: 25px;
-        }
-
-        .copyright, .footer-links span {
-            font-size: 0.85rem;
-        }
+    .footer-content {
+        gap: 6px;
+        padding: 0 5px;
     }
 
-    @media (max-width: 768px) {
-        .footer-content {
-            gap: 12px;
-            padding: 0 15px;
-        }
-
-        .footer-links {
-            gap: 10px;
-        }
-
-        .logo-image {
-            height: 22px;
-        }
-
-        .copyright, .footer-links span {
-            font-size: 0.8rem;
-        }
+    .footer-links {
+        gap: 6px;
     }
 
-    @media (max-width: 576px) {
-        .footer-content {
-            gap: 8px;
-            padding: 0 10px;
-        }
-
-        .footer-links {
-            gap: 8px;
-        }
-
-        .logo-image {
-            height: 20px;
-        }
-
-        .copyright, .footer-links span {
-            font-size: 0.75rem;
-        }
+    .copyright,
+    .footer-links span {
+        font-size: 0.7rem;
     }
-
-    @media (max-width: 480px) {
-        .footer-content {
-            gap: 6px;
-            padding: 0 5px;
-        }
-
-        .footer-links {
-            gap: 6px;
-        }
-
-        .copyright, .footer-links span {
-            font-size: 0.7rem;
-        }
-    }
-
+}
 </style>
-
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}
