@@ -297,7 +297,7 @@
             // Prepare data
             const formData = new FormData();
             formData.append('spreadsheet_id', spreadsheetSelect.value);
-            formData.append('name', sectionNameInput.value.trim());
+            formData.append('section_name', sectionNameInput.value.trim());
             formData.append('csrf_token', '{{ csrf_token() }}');
 
             // Get create section URL from hidden element
@@ -305,9 +305,16 @@
 
             // Send request
             fetch(createSectionUrl, {
-                method: 'POST',
-                body: formData
-            })
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': csrfToken  // Add CSRF token header
+    },
+    body: new URLSearchParams({
+        'spreadsheet_id': spreadsheetSelect.value,
+        'name': sectionNameInput.value.trim()
+    })
+})
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');

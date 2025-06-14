@@ -8,7 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 from datetime import datetime
-from flask_wtf.csrf import validate_csrf
+from flask_wtf.csrf import validate_csrf, CSRFError
 from app.models import Spreadsheet, Sheet, Link, db, get_quick_stats
 from .utils import allowed_file, process_uploaded_file
 from .utils import UPLOAD_PROGRESS
@@ -481,18 +481,23 @@ def get_stats():
 @login_required
 def create_section():
     try:
-        # Change from request.get_json() to request.form
+        # Get and validate data
+        section_name = request.form.get('name')
         spreadsheet_id = request.form.get('spreadsheet_id')
-        section_name = request.form.get('section_name')
 
-        if not spreadsheet_id or not section_name:
+        if not section_name or not spreadsheet_id:
             return jsonify({
-                "status": "error",
-                "message": "Missing required fields"
+                "success": False,
+                "error": "Missing required fields"
             }), 400
 
-        spreadsheet_id = data['spreadsheet_id']
-        section_name = data['section_name']
+        try:
+            spreadsheet_id = int(spreadsheet_id)
+        except ValueError:
+            return jsonify({
+                "success": False,
+                "error": "Invalid spreadsheet ID format"
+            }), 400
 
         # Verify spreadsheet ownership
         spreadsheet = Spreadsheet.query.filter_by(
@@ -501,49 +506,47 @@ def create_section():
         ).first()
 
         if not spreadsheet:
-            logger.warning(f"Spreadsheet not found or access denied: {spreadsheet_id}")
             return jsonify({
-                "status": "error",
-                "message": "Spreadsheet not found"
+                "success": False,
+                "error": "Spreadsheet not found or access denied"
             }), 404
 
-        # Create new section
+        # Check for duplicate section name
+        if Sheet.query.filter_by(name=section_name, spreadsheet_id=spreadsheet.id).first():
+            return jsonify({
+                "success": False,
+                "error": "Section name already exists in this spreadsheet"
+            }), 400
+
+        # Create and save section
         new_sheet = Sheet(
             name=section_name,
             spreadsheet_id=spreadsheet.id
         )
         db.session.add(new_sheet)
         db.session.commit()
-        logger.info(f"Section created: ID {new_sheet.id}")
-
-        # Verify creation
-        db_sheet = Sheet.query.get(new_sheet.id)
-        if not db_sheet:
-            logger.critical("SECTION CREATION VERIFICATION FAILED: Record not found")
-            raise RuntimeError("Section creation verification failed")
 
         return jsonify({
-            "status": "success",
+            "success": True,
             "message": "Section created successfully",
             "section": {
-                "id": db_sheet.id,
-                "name": db_sheet.name,
-                "spreadsheet_id": db_sheet.spreadsheet_id
+                "id": new_sheet.id,
+                "name": new_sheet.name
             }
         }), 200
 
     except SQLAlchemyError as e:
-        logger.error(f"Database error creating section: {str(e)}", exc_info=True)
         db.session.rollback()
+        current_app.logger.error(f"Database error: {str(e)}")
         return jsonify({
-            "status": "error",
-            "message": "Database operation failed"
+            "success": False,
+            "error": "Database operation failed"
         }), 500
     except Exception as e:
-        logger.error(f"Unexpected error creating section: {str(e)}", exc_info=True)
+        current_app.logger.error(f"Unexpected error: {str(e)}")
         return jsonify({
-            "status": "error",
-            "message": "System error creating section"
+            "success": False,
+            "error": "Internal server error"
         }), 500
 
 
