@@ -14,7 +14,7 @@
          style="display: none;">
     </div>
 
-    <!-- Dashboard Header -->
+    <!-- Fixed Dashboard Header -->
     <div class="dashboard-header-container">
         <div class="dashboard-header">
             <h1><i class="bi bi-speedometer2 me-2"></i>Main Dashboard</h1>
@@ -26,7 +26,7 @@
         </div>
     </div>
 
-    <!-- Action Bar -->
+    <!-- Fixed Action Bar -->
     <div class="action-bar">
         <div class="action-container">
             <span class="action-title">Action</span>
@@ -77,227 +77,230 @@
         </div>
     </div>
 
-    <!-- Upload Modal -->
-    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="uploadModalLabel">
-                        <i class="bi bi-upload me-2"></i>Upload New File
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="modalUploadForm" action="/upload" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="mb-3">
-                            <label for="modalFileInput" class="form-label">Select file to upload</label>
-                            <input type="file"
-                                   class="form-control"
-                                   id="modalFileInput"
-                                   name="file"
-                                   accept=".csv, .xls, .xlsx"
-                                   required>
-                            <div class="form-text mt-2">
-                                Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
+    <!-- Scrollable Content Area -->
+    <div class="scrollable-content">
+        <!-- Upload Modal -->
+        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadModalLabel">
+                            <i class="bi bi-upload me-2"></i>Upload New File
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="modalUploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="mb-3">
+                                <label for="modalFileInput" class="form-label">Select file to upload</label>
+                                <input type="file"
+                                       class="form-control"
+                                       id="modalFileInput"
+                                       name="file"
+                                       accept=".csv, .xls, .xlsx"
+                                       required>
+                                <div class="form-text mt-2">
+                                    Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
+                                </div>
                             </div>
-                        </div>
-                        <div id="modal-upload-progress-container" class="mt-3" style="display: none;">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span id="modal-upload-status">Status: Preparing upload...</span>
-                                <span id="modal-upload-percentage">0%</span>
+                            <div id="modal-upload-progress-container" class="mt-3" style="display: none;">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span id="modal-upload-status">Status: Preparing upload...</span>
+                                    <span id="modal-upload-percentage">0%</span>
+                                </div>
+                                <div class="progress">
+                                    <div id="modal-upload-progress" class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div id="modal-upload-success-message" class="mt-3 text-success" style="display: none;"></div>
                             </div>
-                            <div class="progress">
-                                <div id="modal-upload-progress" class="progress-bar progress-bar-striped progress-bar-animated"
-                                     role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <div id="modal-upload-success-message" class="mt-3 text-success" style="display: none;"></div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="modal-upload-submit">
-                        <i class="bi bi-upload me-1"></i>Upload File
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- New Section Modal -->
-    <div class="modal fade" id="sectionModal" tabindex="-1" aria-labelledby="sectionModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="sectionModalLabel">
-                        <i class="bi bi-folder-plus me-2"></i>Create New Section
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="modalSectionForm">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="mb-3">
-                            <label for="modalSpreadsheetSelect" class="form-label">Select Spreadsheet</label>
-                            <select class="form-select" id="modalSpreadsheetSelect" required>
-                                <option value="" disabled selected>Choose spreadsheet...</option>
-                                {% for spreadsheet in spreadsheets %}
-                                    <option value="{{ spreadsheet.id }}">{{ spreadsheet.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalSectionName" class="form-label">Section Name</label>
-                            <input type="text" class="form-control" id="modalSectionName"
-                                   placeholder="Enter section name" required>
-                            <div id="modal-section-name-error" class="invalid-feedback" style="display: none;"></div>
-                        </div>
-                        <div id="section-success-message" class="mt-3 text-success" style="display: none;"></div>
-                        <div id="section-error-message" class="mt-3 text-danger" style="display: none;"></div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="modal-section-submit">
-                        <span id="section-submit-text">Create Section</span>
-                        <span id="section-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Rename Section Modal -->
-    <div class="modal fade" id="renameSectionModal" tabindex="-1" aria-labelledby="renameSectionModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="renameSectionModalLabel">
-                        <i class="bi bi-pencil-square me-2"></i>Rename Section
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="modalRenameForm">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="mb-3">
-                            <label for="renameSectionSelect" class="form-label">Select Section</label>
-                            <select class="form-select" id="renameSectionSelect" required>
-                                <option value="" disabled selected>Choose section...</option>
-                                {% for section in sections %}
-                                    <option value="{{ section.id }}">{{ section.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="newSectionName" class="form-label">New Section Name</label>
-                            <input type="text" class="form-control" id="newSectionName"
-                                   placeholder="Enter new section name" required>
-                            <div id="rename-section-name-error" class="invalid-feedback" style="display: none;"></div>
-                        </div>
-                        <div id="rename-success-message" class="mt-3 text-success" style="display: none;"></div>
-                        <div id="rename-error-message" class="mt-3 text-danger" style="display: none;"></div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="modal-rename-submit">
-                        <span id="rename-submit-text">Rename Section</span>
-                        <span id="rename-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete Section Modal -->
-    <div class="modal fade" id="deleteSectionModal" tabindex="-1" aria-labelledby="deleteSectionModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger" id="deleteSectionModalLabel">
-                        <i class="bi bi-trash me-2"></i>Delete Section
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="modalDeleteForm">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="mb-3">
-                            <label for="deleteSectionSelect" class="form-label">Select Section to Delete</label>
-                            <select class="form-select" id="deleteSectionSelect" required>
-                                <option value="" disabled selected>Choose section...</option>
-                                {% for section in sections %}
-                                    <option value="{{ section.id }}">{{ section.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
-                            Warning: This will permanently delete the section and all its records!
-                        </div>
-                        <div id="delete-error-message" class="mt-3 text-danger" style="display: none;"></div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="modal-delete-submit">
-                        <span id="delete-submit-text">Delete Section</span>
-                        <span id="delete-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Dashboard Layout -->
-    <div class="dashboard-layout">
-        <!-- Left Sidebar - Replaced with image -->
-        <div class="sidebar left-sidebar">
-            <img src="{{ url_for('static', filename='images/dashboard2.jpg') }}"
-                 alt="Dashboard Visual"
-                 class="sidebar-image">
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Section Creation -->
-            <div class="sidebar-card">
-                <div class="sidebar-card-header">
-                    <h2 class="sidebar-title">Here are your Dashboard Sections!</h2>
-                </div>
-                <div class="sidebar-card-body">
-                    <div class="horizontal-section-list">
-                        {% include '_sections.html' %}
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="modal-upload-submit">
+                            <i class="bi bi-upload me-1"></i>Upload File
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Footer Container -->
-    <div class="footer-container">
-        <div class="footer-content">
-            <!-- Logo Image -->
-            <div class="footer-logo">
-                <img src="{{ url_for('static', filename='images/dashboard_logo1.png') }}"
-                     alt="PepTechnologies Logo"
-                     class="logo-image">
+        <!-- New Section Modal -->
+        <div class="modal fade" id="sectionModal" tabindex="-1" aria-labelledby="sectionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="sectionModalLabel">
+                            <i class="bi bi-folder-plus me-2"></i>Create New Section
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="modalSectionForm">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="mb-3">
+                                <label for="modalSpreadsheetSelect" class="form-label">Select Spreadsheet</label>
+                                <select class="form-select" id="modalSpreadsheetSelect" required>
+                                    <option value="" disabled selected>Choose spreadsheet...</option>
+                                    {% for spreadsheet in spreadsheets %}
+                                        <option value="{{ spreadsheet.id }}">{{ spreadsheet.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="modalSectionName" class="form-label">Section Name</label>
+                                <input type="text" class="form-control" id="modalSectionName"
+                                       placeholder="Enter section name" required>
+                                <div id="modal-section-name-error" class="invalid-feedback" style="display: none;"></div>
+                            </div>
+                            <div id="section-success-message" class="mt-3 text-success" style="display: none;"></div>
+                            <div id="section-error-message" class="mt-3 text-danger" style="display: none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="modal-section-submit">
+                            <span id="section-submit-text">Create Section</span>
+                            <span id="section-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                        </button>
+                    </div>
+                </div>
             </div>
-
-            <!-- Copyright -->
-            <div class="copyright">
-                © 2025 PepTechnologies, Inc.
-            </div>
-            <!-- Links as text -->
-            <div class="footer-links">
-            <span>Terms</span>
-            <span>Privacy</span>
-            <span>Security</span>
-            <span>Contact</span>
-            <span>Manage cookies</span>
         </div>
+
+        <!-- Rename Section Modal -->
+        <div class="modal fade" id="renameSectionModal" tabindex="-1" aria-labelledby="renameSectionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="renameSectionModalLabel">
+                            <i class="bi bi-pencil-square me-2"></i>Rename Section
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="modalRenameForm">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="mb-3">
+                                <label for="renameSectionSelect" class="form-label">Select Section</label>
+                                <select class="form-select" id="renameSectionSelect" required>
+                                    <option value="" disabled selected>Choose section...</option>
+                                    {% for section in sections %}
+                                        <option value="{{ section.id }}">{{ section.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newSectionName" class="form-label">New Section Name</label>
+                                <input type="text" class="form-control" id="newSectionName"
+                                       placeholder="Enter new section name" required>
+                                <div id="rename-section-name-error" class="invalid-feedback" style="display: none;"></div>
+                            </div>
+                            <div id="rename-success-message" class="mt-3 text-success" style="display: none;"></div>
+                            <div id="rename-error-message" class="mt-3 text-danger" style="display: none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="modal-rename-submit">
+                            <span id="rename-submit-text">Rename Section</span>
+                            <span id="rename-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Section Modal -->
+        <div class="modal fade" id="deleteSectionModal" tabindex="-1" aria-labelledby="deleteSectionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-danger" id="deleteSectionModalLabel">
+                            <i class="bi bi-trash me-2"></i>Delete Section
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="modalDeleteForm">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="mb-3">
+                                <label for="deleteSectionSelect" class="form-label">Select Section to Delete</label>
+                                <select class="form-select" id="deleteSectionSelect" required>
+                                    <option value="" disabled selected>Choose section...</option>
+                                    {% for section in sections %}
+                                        <option value="{{ section.id }}">{{ section.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="alert alert-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Warning: This will permanently delete the section and all its records!
+                            </div>
+                            <div id="delete-error-message" class="mt-3 text-danger" style="display: none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="modal-delete-submit">
+                            <span id="delete-submit-text">Delete Section</span>
+                            <span id="delete-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Layout -->
+        <div class="dashboard-layout">
+            <!-- Left Sidebar - Replaced with image -->
+            <div class="sidebar left-sidebar">
+                <img src="{{ url_for('static', filename='images/dashboard2.jpg') }}"
+                     alt="Dashboard Visual"
+                     class="sidebar-image">
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Section Creation -->
+                <div class="sidebar-card">
+                    <div class="sidebar-card-header">
+                        <h2 class="sidebar-title">Here are your Dashboard Sections!</h2>
+                    </div>
+                    <div class="sidebar-card-body">
+                        <div class="horizontal-section-list">
+                            {% include '_sections.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Container -->
+        <div class="footer-container">
+            <div class="footer-content">
+                <!-- Logo Image -->
+                <div class="footer-logo">
+                    <img src="{{ url_for('static', filename='images/dashboard_logo1.png') }}"
+                         alt="PepTechnologies Logo"
+                         class="logo-image">
+                </div>
+
+                <!-- Copyright -->
+                <div class="copyright">
+                    © 2025 PepTechnologies, Inc.
+                </div>
+                <!-- Links as text -->
+                <div class="footer-links">
+                <span>Terms</span>
+                <span>Privacy</span>
+                <span>Security</span>
+                <span>Contact</span>
+                <span>Manage cookies</span>
+            </div>
+            </div>
         </div>
     </div>
 </div>
@@ -736,7 +739,15 @@ document.addEventListener('DOMContentLoaded', function() {
 body {
     font-family: 'Inter', sans-serif;
     line-height: 1.6;
-    padding-top: 80px; /* Padding for fixed header */
+    padding-top: 120px; /* Increased padding for both fixed bars */
+    overflow: hidden; /* Prevent body scrolling */
+    height: 100vh;
+}
+
+/* Scrollable content container */
+.scrollable-content {
+    height: calc(100vh - 120px); /* Full height minus header height */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 /* ===== DASHBOARD HEADER ===== */
@@ -767,13 +778,25 @@ body {
     padding: 0.5rem 1rem;
 }
 
+/* ===== ACTION BAR ===== */
+.action-bar {
+    position: fixed;
+    top: 60px; /* Below the dashboard header */
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.8rem 1.5rem;
+}
+
 /* ===== DASHBOARD LAYOUT ===== */
 .dashboard-layout {
     display: grid;
     grid-template-columns: var(--sidebar-width) var(--main-width) var(--sidebar-width);
     gap: var(--gap-size);
     width: 100%;
-    margin-top: 0;
+    margin-top: 20px;
 }
 
 .sidebar {
@@ -877,19 +900,6 @@ body {
 }
 
 /* ===== ACTION BAR ===== */
-.action-bar {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    padding: 0.8rem 1.5rem;
-    position: fixed;
-    top: 60px;
-    left: 0;
-    right: 0;
-    z-index: 999;
-    display: flex;
-    justify-content: center;
-}
-
 .action-container {
     display: flex;
     align-items: center;
@@ -1032,8 +1042,8 @@ body {
 .footer-container {
     background-color: #f8f9fa;
     border-top: 1px solid #dee2e6;
-    padding: 20px 0;
-    margin-top: 40px;
+    padding: 10px 0;
+    margin-top: 20px;
 }
 
 .footer-content {
@@ -1044,7 +1054,7 @@ body {
     justify-content: center;
     max-width: 1200px;
     margin: 0 auto;
-    gap: 30px;
+    gap: 15px;
 }
 
 .footer-logo {
@@ -1054,13 +1064,13 @@ body {
 }
 
 .logo-image {
-    height: 30px;
+    height: 20px;
     width: auto;
 }
 
 .copyright {
     color: #6c757d;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     margin: 0;
     white-space: nowrap;
 }
@@ -1068,23 +1078,23 @@ body {
 .footer-links {
     display: flex;
     flex-wrap: nowrap;
-    gap: 20px;
+    gap: 15px;
 }
 
 .footer-links span {
     color: #495057;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     white-space: nowrap;
 }
 
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 1200px) {
     .footer-content {
-        gap: 20px;
+        gap: 10px;
     }
 
     .footer-links {
-        gap: 15px;
+        gap: 10px;
     }
 }
 
@@ -1094,20 +1104,20 @@ body {
     }
 
     .footer-content {
-        gap: 15px;
+        gap: 8px;
     }
 
     .footer-links {
-        gap: 12px;
+        gap: 8px;
     }
 
     .logo-image {
-        height: 25px;
+        height: 18px;
     }
 
     .copyright,
     .footer-links span {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
     }
 }
 
@@ -1125,23 +1135,18 @@ body {
 
     .footer-content {
         flex-direction: column;
-        gap: 12px;
+        gap: 6px;
         padding: 0 15px;
     }
 
     .footer-links {
-        gap: 10px;
+        gap: 6px;
         flex-wrap: wrap;
         justify-content: center;
     }
 
     .logo-image {
-        height: 22px;
-    }
-
-    .copyright,
-    .footer-links span {
-        font-size: 0.8rem;
+        height: 16px;
     }
 }
 
@@ -1160,21 +1165,21 @@ body {
     }
 
     .footer-content {
-        gap: 8px;
+        gap: 5px;
         padding: 0 10px;
     }
 
     .footer-links {
-        gap: 8px;
+        gap: 5px;
     }
 
     .logo-image {
-        height: 20px;
+        height: 14px;
     }
 
     .copyright,
     .footer-links span {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
 }
 
@@ -1189,18 +1194,23 @@ body {
     }
 
     .footer-content {
-        gap: 6px;
+        gap: 4px;
         padding: 0 5px;
     }
 
     .footer-links {
-        gap: 6px;
+        gap: 4px;
+    }
+
+    .logo-image {
+        height: 12px;
     }
 
     .copyright,
     .footer-links span {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
     }
 }
 </style>
+
 {% endblock %}
