@@ -669,3 +669,72 @@ def delete_section():
             "success": False,
             "error": "Internal server error"
         }), 500
+
+
+@main_bp.route('/rename_section', methods=['POST'])
+@login_required
+def rename_section():
+    try:
+        # Get JSON data from request
+        data = request.get_json()
+        section_id = data.get('section_id')
+        new_name = data.get('new_name')
+
+        if not section_id or not new_name:
+            return jsonify({"success": False, "error": "Missing required fields"}), 400
+
+        try:
+            section_id = int(section_id)
+        except ValueError:
+            return jsonify({"success": False, "error": "Invalid section ID"}), 400
+
+        # Verify section ownership
+        section = Sheet.query \
+            .join(Spreadsheet) \
+            .filter(
+            Sheet.id == section_id,
+            Spreadsheet.user_id == current_user.id
+        ).first()
+
+        if not section:
+            return jsonify({"success": False, "error": "Section not found or access denied"}), 404
+
+        # Check if new name already exists in the same spreadsheet
+        existing_section = Sheet.query.filter(
+            Sheet.name == new_name,
+            Sheet.spreadsheet_id == section.spreadsheet_id,
+            Sheet.id != section.id
+        ).first()
+
+        if existing_section:
+            return jsonify({
+                "success": False,
+                "error": "Section name already exists in this spreadsheet"
+            }), 400
+
+        # Update the section name
+        section.name = new_name
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Section renamed successfully",
+            "section": {
+                "id": section.id,
+                "name": section.name
+            }
+        }), 200
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        current_app.logger.error(f"Database error renaming section: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Database operation failed"
+        }), 500
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error renaming section: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Internal server error"
+        }), 500

@@ -9,6 +9,8 @@
          data-create-section-url="{{ url_for('main.create_section') }}"
          data-get-sections-url="{{ url_for('main.get_sections') }}"
          data-get-stats-url="{{ url_for('main.get_stats') }}"
+         data-delete-section-url="{{ url_for('main.delete_section') }}"
+         data-rename-section-url="{{ url_for('main.rename_section') }}"
          style="display: none;">
     </div>
 
@@ -34,7 +36,9 @@
             <a href="#" class="action-link" id="add-new-section-btn">
                 Add New Section <i class="bi bi-folder-plus"></i>
             </a>
-
+            <a href="#" class="action-link text-warning" id="rename-section-btn">
+                Rename Section <i class="bi bi-pencil-square"></i>
+            </a>
             <a href="#" class="action-link text-danger" id="delete-section-btn">
                  Delete Section <i class="bi bi-trash"></i>
             </a>
@@ -73,136 +77,180 @@
         </div>
     </div>
 
-<!-- Upload Modal -->
-<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="uploadModalLabel">
-                    <i class="bi bi-upload me-2"></i>Upload New File
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="modalUploadForm" action="/upload" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <div class="mb-3">
-                        <label for="modalFileInput" class="form-label">Select file to upload</label>
-                        <input type="file"
-                            class="form-control"
-                            id="modalFileInput"
-                            name="file"
-                            accept=".csv, .xls, .xlsx"
-                            required>
-                        <div class="form-text mt-2">
-                            Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
+    <!-- Upload Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">
+                        <i class="bi bi-upload me-2"></i>Upload New File
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="modalUploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="modalFileInput" class="form-label">Select file to upload</label>
+                            <input type="file"
+                                   class="form-control"
+                                   id="modalFileInput"
+                                   name="file"
+                                   accept=".csv, .xls, .xlsx"
+                                   required>
+                            <div class="form-text mt-2">
+                                Supported formats: Excel (.xlsx, .xls) or CSV (.csv)
+                            </div>
                         </div>
-                    </div>
-                    <div id="modal-upload-progress-container" class="mt-3" style="display: none;">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span id="modal-upload-status">Status: Preparing upload...</span>
-                            <span id="modal-upload-percentage">0%</span>
+                        <div id="modal-upload-progress-container" class="mt-3" style="display: none;">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span id="modal-upload-status">Status: Preparing upload...</span>
+                                <span id="modal-upload-percentage">0%</span>
+                            </div>
+                            <div class="progress">
+                                <div id="modal-upload-progress" class="progress-bar progress-bar-striped progress-bar-animated"
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div id="modal-upload-success-message" class="mt-3 text-success" style="display: none;"></div>
                         </div>
-                        <div class="progress">
-                            <div id="modal-upload-progress" class="progress-bar progress-bar-striped progress-bar-animated"
-                                role="progressbar" style="width: 0%"></div>
-                        </div>
-                        <div id="modal-upload-success-message" class="mt-3 text-success" style="display: none;"></div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="modal-upload-submit">
-                    <i class="bi bi-upload me-1"></i>Upload File
-                </button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="modal-upload-submit">
+                        <i class="bi bi-upload me-1"></i>Upload File
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- New Section Modal -->
-<div class="modal fade" id="sectionModal" tabindex="-1" aria-labelledby="sectionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="sectionModalLabel">
-                    <i class="bi bi-folder-plus me-2"></i>Create New Section
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="modalSectionForm">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <div class="mb-3">
-                        <label for="modalSpreadsheetSelect" class="form-label">Select Spreadsheet</label>
-                        <select class="form-select" id="modalSpreadsheetSelect" required>
-                            <option value="" disabled selected>Choose spreadsheet...</option>
-                            {% for spreadsheet in spreadsheets %}
-                                <option value="{{ spreadsheet.id }}">{{ spreadsheet.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="modalSectionName" class="form-label">Section Name</label>
-                        <input type="text" class="form-control" id="modalSectionName"
-                            placeholder="Enter section name" required>
-                        <div id="modal-section-name-error" class="invalid-feedback" style="display: none;"></div>
-                    </div>
-                    <div id="section-success-message" class="mt-3 text-success" style="display: none;"></div>
-                    <div id="section-error-message" class="mt-3 text-danger" style="display: none;"></div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="modal-section-submit">
-                    <span id="section-submit-text">Create Section</span>
-                    <span id="section-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-                </button>
+    <!-- New Section Modal -->
+    <div class="modal fade" id="sectionModal" tabindex="-1" aria-labelledby="sectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sectionModalLabel">
+                        <i class="bi bi-folder-plus me-2"></i>Create New Section
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="modalSectionForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="modalSpreadsheetSelect" class="form-label">Select Spreadsheet</label>
+                            <select class="form-select" id="modalSpreadsheetSelect" required>
+                                <option value="" disabled selected>Choose spreadsheet...</option>
+                                {% for spreadsheet in spreadsheets %}
+                                    <option value="{{ spreadsheet.id }}">{{ spreadsheet.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modalSectionName" class="form-label">Section Name</label>
+                            <input type="text" class="form-control" id="modalSectionName"
+                                   placeholder="Enter section name" required>
+                            <div id="modal-section-name-error" class="invalid-feedback" style="display: none;"></div>
+                        </div>
+                        <div id="section-success-message" class="mt-3 text-success" style="display: none;"></div>
+                        <div id="section-error-message" class="mt-3 text-danger" style="display: none;"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="modal-section-submit">
+                        <span id="section-submit-text">Create Section</span>
+                        <span id="section-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Delete Section Modal -->
-<div class="modal fade" id="deleteSectionModal" tabindex="-1" aria-labelledby="deleteSectionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-danger" id="deleteSectionModalLabel">
-                    <i class="bi bi-trash me-2"></i>Delete Section
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="modalDeleteForm">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <div class="mb-3">
-                        <label for="deleteSectionSelect" class="form-label">Select Section to Delete</label>
-                        <select class="form-select" id="deleteSectionSelect" required>
-                            <option value="" disabled selected>Choose section...</option>
-                            {% for section in sections %}
-                                <option value="{{ section.id }}">{{ section.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="alert alert-danger">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        Warning: This will permanently delete the section and all its records!
-                    </div>
-                    <div id="delete-error-message" class="mt-3 text-danger" style="display: none;"></div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="modal-delete-submit">
-                    <span id="delete-submit-text">Delete Section</span>
-                    <span id="delete-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-                </button>
+    <!-- Rename Section Modal -->
+    <div class="modal fade" id="renameSectionModal" tabindex="-1" aria-labelledby="renameSectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="renameSectionModalLabel">
+                        <i class="bi bi-pencil-square me-2"></i>Rename Section
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="modalRenameForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="renameSectionSelect" class="form-label">Select Section</label>
+                            <select class="form-select" id="renameSectionSelect" required>
+                                <option value="" disabled selected>Choose section...</option>
+                                {% for section in sections %}
+                                    <option value="{{ section.id }}">{{ section.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newSectionName" class="form-label">New Section Name</label>
+                            <input type="text" class="form-control" id="newSectionName"
+                                   placeholder="Enter new section name" required>
+                            <div id="rename-section-name-error" class="invalid-feedback" style="display: none;"></div>
+                        </div>
+                        <div id="rename-success-message" class="mt-3 text-success" style="display: none;"></div>
+                        <div id="rename-error-message" class="mt-3 text-danger" style="display: none;"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="modal-rename-submit">
+                        <span id="rename-submit-text">Rename Section</span>
+                        <span id="rename-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Delete Section Modal -->
+    <div class="modal fade" id="deleteSectionModal" tabindex="-1" aria-labelledby="deleteSectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="deleteSectionModalLabel">
+                        <i class="bi bi-trash me-2"></i>Delete Section
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="modalDeleteForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="deleteSectionSelect" class="form-label">Select Section to Delete</label>
+                            <select class="form-select" id="deleteSectionSelect" required>
+                                <option value="" disabled selected>Choose section...</option>
+                                {% for section in sections %}
+                                    <option value="{{ section.id }}">{{ section.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Warning: This will permanently delete the section and all its records!
+                        </div>
+                        <div id="delete-error-message" class="mt-3 text-danger" style="display: none;"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="modal-delete-submit">
+                        <span id="delete-submit-text">Delete Section</span>
+                        <span id="delete-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Dashboard Layout -->
     <div class="dashboard-layout">
         <!-- Left Sidebar - Replaced with image -->
@@ -262,14 +310,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize modals
     const uploadModal = new bootstrap.Modal(document.getElementById('uploadModal'));
     const sectionModal = new bootstrap.Modal(document.getElementById('sectionModal'));
+    const renameSectionModal = new bootstrap.Modal(document.getElementById('renameSectionModal'));
     const deleteSectionModal = new bootstrap.Modal(document.getElementById('deleteSectionModal'));
 
     // Get buttons
     const addNewFileBtn = document.getElementById('add-new-file-btn');
     const addNewSectionBtn = document.getElementById('add-new-section-btn');
+    const renameSectionBtn = document.getElementById('rename-section-btn');
     const deleteSectionBtn = document.getElementById('delete-section-btn');
     const modalUploadSubmit = document.getElementById('modal-upload-submit');
     const modalSectionSubmit = document.getElementById('modal-section-submit');
+    const modalRenameSubmit = document.getElementById('modal-rename-submit');
     const modalDeleteSubmit = document.getElementById('modal-delete-submit');
 
     // File upload functionality
@@ -288,6 +339,16 @@ document.addEventListener('DOMContentLoaded', function() {
         sectionModal.show();
     });
 
+    // Rename section functionality
+    renameSectionBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Reset form
+        document.getElementById('modalRenameForm').reset();
+        document.getElementById('rename-success-message').style.display = 'none';
+        document.getElementById('rename-error-message').style.display = 'none';
+        renameSectionModal.show();
+    });
+
     // Delete section functionality
     deleteSectionBtn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -302,6 +363,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle section creation form submission
     modalSectionSubmit.addEventListener('click', handleSectionCreation);
+
+    // Handle section rename form submission
+    modalRenameSubmit.addEventListener('click', handleSectionRename);
 
     // Handle delete section form submission
     modalDeleteSubmit.addEventListener('click', handleSectionDeletion);
@@ -403,6 +467,90 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Section rename handler
+    function handleSectionRename() {
+        const sectionSelect = document.getElementById('renameSectionSelect');
+        const newNameInput = document.getElementById('newSectionName');
+        const errorMessage = document.getElementById('rename-section-name-error');
+        const successMessage = document.getElementById('rename-success-message');
+        const errorContainer = document.getElementById('rename-error-message');
+        const submitText = document.getElementById('rename-submit-text');
+        const spinner = document.getElementById('rename-spinner');
+
+        // Reset messages
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+        errorContainer.style.display = 'none';
+        newNameInput.classList.remove('is-invalid');
+
+        // Validate inputs
+        if (!sectionSelect.value) {
+            errorContainer.textContent = 'Please select a section to rename';
+            errorContainer.style.display = 'block';
+            return;
+        }
+
+        if (!newNameInput.value.trim()) {
+            errorMessage.textContent = 'New section name is required';
+            errorMessage.style.display = 'block';
+            newNameInput.classList.add('is-invalid');
+            return;
+        }
+
+        // Show loading state
+        submitText.style.display = 'none';
+        spinner.style.display = 'inline-block';
+        modalRenameSubmit.disabled = true;
+
+        // Get rename section URL from hidden element
+        const renameSectionUrl = document.getElementById('app-urls').dataset.renameSectionUrl;
+
+        // Send request
+        fetch(renameSectionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                'section_id': sectionSelect.value,
+                'new_name': newNameInput.value.trim()
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                successMessage.textContent = 'Section renamed successfully!';
+                successMessage.style.display = 'block';
+
+                // Close modal after 1.5 seconds
+                setTimeout(() => {
+                    renameSectionModal.hide();
+                    // Reload page to show changes
+                    setTimeout(() => location.reload(), 500);
+                }, 1500);
+            } else {
+                throw new Error(data.error || 'Failed to rename section');
+            }
+        })
+        .catch(error => {
+            errorContainer.textContent = error.message || 'An error occurred while renaming the section';
+            errorContainer.style.display = 'block';
+        })
+        .finally(() => {
+            // Reset button state
+            submitText.style.display = 'inline';
+            spinner.style.display = 'none';
+            modalRenameSubmit.disabled = false;
+        });
+    }
+
     // Section deletion handler
     function handleSectionDeletion() {
         const sectionSelect = document.getElementById('deleteSectionSelect');
@@ -426,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modalDeleteSubmit.disabled = true;
 
         // Get delete section URL
-        const deleteSectionUrl = "{{ url_for('main.delete_section') }}";
+        const deleteSectionUrl = document.getElementById('app-urls').dataset.deleteSectionUrl;
 
         // Get CSRF token specifically from delete form
         const deleteCsrfToken = document.querySelector('#modalDeleteForm input[name="csrf_token"]').value;
@@ -549,6 +697,20 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modal-section-submit').disabled = false;
     });
 
+    // Reset rename modal when closed
+    document.getElementById('renameSectionModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('modalRenameForm').reset();
+        document.getElementById('rename-section-name-error').style.display = 'none';
+        document.getElementById('rename-success-message').style.display = 'none';
+        document.getElementById('rename-error-message').style.display = 'none';
+        document.getElementById('newSectionName').classList.remove('is-invalid');
+
+        // Reset button state
+        document.getElementById('rename-submit-text').style.display = 'inline';
+        document.getElementById('rename-spinner').style.display = 'none';
+        document.getElementById('modal-rename-submit').disabled = false;
+    });
+
     // Reset delete modal when closed
     document.getElementById('deleteSectionModal').addEventListener('hidden.bs.modal', function() {
         document.getElementById('modalDeleteForm').reset();
@@ -561,7 +723,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -764,6 +925,15 @@ body {
     color: #0a58ca;
 }
 
+.action-link.text-warning {
+    color: #ffc107 !important;
+}
+
+.action-link.text-warning:hover {
+    color: #e0a800 !important;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
 .action-link.text-danger {
     color: #dc3545 !important;
 }
@@ -844,6 +1014,7 @@ body {
 }
 
 #section-spinner,
+#rename-spinner,
 #delete-spinner {
     margin-left: 8px;
     vertical-align: middle;
@@ -1032,5 +1203,4 @@ body {
     }
 }
 </style>
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}
