@@ -48,13 +48,13 @@
            <i class="bi bi-file-earmark-excel me-1"></i> Excel Template
             </a>
         <a href="#" class="action-link" id="add-new-section-btn">
-            <i class="bi bi-folder-plus me-1"></i> Add New Section
+            <i class="bi bi-folder-plus me-1"></i> Add New Department
         </a>
         <a href="#" class="action-link text-warning" id="rename-section-btn">
-            <i class="bi bi-pencil-square me-1"></i> Rename Section
+            <i class="bi bi-pencil-square me-1"></i> Rename Department
         </a>
         <a href="#" class="action-link text-danger" id="delete-section-btn">
-            <i class="bi bi-trash me-1"></i> Delete Section
+            <i class="bi bi-trash me-1"></i> Delete Department
         </a>
 
 
@@ -74,7 +74,7 @@
                         <i class="bi bi-collection"></i>
                     </div>
                     <div class="stat-content">
-                        <span class="stat-label">Sections</span>
+                        <span class="stat-label">Department</span>
                         <span class="stat-value" data-stat="sections">{{ total_sections }}</span>
                     </div>
                 </div>
@@ -149,7 +149,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="sectionModalLabel">
-                            <i class="bi bi-folder-plus me-2"></i>Create New Section
+                            <i class="bi bi-folder-plus me-2"></i>Create New Department
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -166,7 +166,7 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="modalSectionName" class="form-label">Section Name</label>
+                                <label for="modalSectionName" class="form-label">Department Name</label>
                                 <input type="text" class="form-control" id="modalSectionName"
                                        placeholder="Enter section name" required>
                                 <div id="modal-section-name-error" class="invalid-feedback" style="display: none;"></div>
@@ -178,7 +178,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-primary" id="modal-section-submit">
-                            <span id="section-submit-text">Create Section</span>
+                            <span id="section-submit-text">Create Department</span>
                             <span id="section-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
                         </button>
                     </div>
@@ -192,7 +192,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="renameSectionModalLabel">
-                            <i class="bi bi-pencil-square me-2"></i>Rename Section
+                            <i class="bi bi-pencil-square me-2"></i>Rename Department
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -200,16 +200,16 @@
                         <form id="modalRenameForm">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <div class="mb-3">
-                                <label for="renameSectionSelect" class="form-label">Select Section</label>
+                                <label for="renameSectionSelect" class="form-label">Select Department</label>
                                 <select class="form-select" id="renameSectionSelect" required>
-                                    <option value="" disabled selected>Choose section...</option>
+                                    <option value="" disabled selected>Choose Department...</option>
                                     {% for section in sections %}
                                         <option value="{{ section.id }}">{{ section.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="newSectionName" class="form-label">New Section Name</label>
+                                <label for="newSectionName" class="form-label">New Department Name</label>
                                 <input type="text" class="form-control" id="newSectionName"
                                        placeholder="Enter new section name" required>
                                 <div id="rename-section-name-error" class="invalid-feedback" style="display: none;"></div>
@@ -235,7 +235,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title text-danger" id="deleteSectionModalLabel">
-                            <i class="bi bi-trash me-2"></i>Delete Section
+                            <i class="bi bi-trash me-2"></i>Delete Department
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -243,9 +243,9 @@
                         <form id="modalDeleteForm">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <div class="mb-3">
-                                <label for="deleteSectionSelect" class="form-label">Select Section to Delete</label>
+                                <label for="deleteSectionSelect" class="form-label">Select Department to Delete</label>
                                 <select class="form-select" id="deleteSectionSelect" required>
-                                    <option value="" disabled selected>Choose section...</option>
+                                    <option value="" disabled selected>Choose Department...</option>
                                     {% for section in sections %}
                                         <option value="{{ section.id }}">{{ section.name }}</option>
                                     {% endfor %}
@@ -253,7 +253,7 @@
                             </div>
                             <div class="alert alert-danger">
                                 <i class="bi bi-exclamation-triangle me-2"></i>
-                                Warning: This will permanently delete the section and all its records!
+                                Warning: This will permanently delete the Department and all its records!
                             </div>
                             <div id="delete-error-message" class="mt-3 text-danger" style="display: none;"></div>
                         </form>
@@ -261,7 +261,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-danger" id="modal-delete-submit">
-                            <span id="delete-submit-text">Delete Section</span>
+                            <span id="delete-submit-text">Delete Department</span>
                             <span id="delete-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
                         </button>
                     </div>
