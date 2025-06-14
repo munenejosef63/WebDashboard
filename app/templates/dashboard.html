@@ -23,7 +23,7 @@
                  alt="Dashboard Logo"
                  style="width: 2.5em; height: 2.5em; object-fit: contain;">
             {% set owner_name = current_user.username.replace('Dashboard', '') %}
-            {{ owner_name }}'s WebLinks MainDashboard
+            {{ owner_name }}'s WebLinks Main Dashboard
         </h1>
     </div>
     <div class="logout-container">
@@ -38,12 +38,15 @@
     <!-- Fixed Action Bar -->
     <div class="action-bar">
         <div class="action-container">
-            <span class="action-title">Action</span>
+            <span class="action-title">Actions</span>
 
 <!-- Fixed Add New File button with icon -->
         <a href="#" class="action-link" id="add-new-file-btn">
             <i class="bi bi-plus me-1"></i> Add New File
         </a>
+            <a href="#" class="action-link" id="download-template-btn">
+           <i class="bi bi-file-earmark-excel me-1"></i> Excel Template
+            </a>
         <a href="#" class="action-link" id="add-new-section-btn">
             <i class="bi bi-folder-plus me-1"></i> Add New Section
         </a>
@@ -280,7 +283,7 @@
                 <!-- Section Creation -->
                 <div class="sidebar-card">
                     <div class="sidebar-card-header">
-                        <h2 class="sidebar-title">Here are your Dashboard Sections!</h2>
+                        <h3 class="sidebar-title">Here are your Role-Based Workspaces or Departments!</h3>
                     </div>
                     <div class="sidebar-card-body">
                         <div class="horizontal-section-list">
@@ -340,6 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get buttons
     const addNewFileBtn = document.getElementById('add-new-file-btn');
+    const downloadTemplateBtn = document.getElementById('download-template-btn'); // NEW BUTTON
     const addNewSectionBtn = document.getElementById('add-new-section-btn');
     const renameSectionBtn = document.getElementById('rename-section-btn');
     const deleteSectionBtn = document.getElementById('delete-section-btn');
@@ -352,6 +356,19 @@ document.addEventListener('DOMContentLoaded', function() {
     addNewFileBtn.addEventListener('click', function(e) {
         e.preventDefault();
         uploadModal.show();
+    });
+
+    // NEW: Download template functionality
+    downloadTemplateBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // Create hidden download link
+        const link = document.createElement('a');
+        link.href = "{{ url_for('static', filename='files/template.xlsx') }}";
+        link.download = 'WebLinks_Upload_Template.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     });
 
     // Section creation functionality

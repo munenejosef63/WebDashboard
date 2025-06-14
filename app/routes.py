@@ -12,6 +12,7 @@ from flask_wtf.csrf import validate_csrf, CSRFError
 from app.models import Spreadsheet, Sheet, Link, db, get_quick_stats
 from .utils import allowed_file, process_uploaded_file
 from .utils import UPLOAD_PROGRESS
+from flask import send_from_directory
 
 # Configure detailed logging
 logging.basicConfig(
@@ -738,3 +739,13 @@ def rename_section():
             "success": False,
             "error": "Internal server error"
         }), 500
+
+
+@main_bp.route('/download-template')
+def download_template():
+    return send_from_directory(
+        'static/files',
+        'template.xlsx',
+        as_attachment=True,
+        download_name='WebLinks_Upload_Template.xlsx'
+    )
