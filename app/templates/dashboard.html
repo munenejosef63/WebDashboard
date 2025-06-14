@@ -164,7 +164,7 @@
     <div class="dashboard-layout">
         <!-- Left Sidebar - Replaced with image -->
         <div class="sidebar left-sidebar">
-            <img src="{{ url_for('static', filename='images/dashboard2.png') }}"
+            <img src="{{ url_for('static', filename='images/dashboard2.jpg') }}"
                  alt="Dashboard Visual"
                  class="sidebar-image">
         </div>
@@ -182,6 +182,31 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Footer Container -->
+    <div class="footer-container">
+        <div class="footer-content">
+            <!-- Logo Image -->
+            <div class="footer-logo">
+                <img src="{{ url_for('static', filename='images/dashboard_logo1.png') }}"
+                     alt="PepTechnologies Logo"
+                     class="logo-image">
+            </div>
+
+            <!-- Copyright -->
+            <div class="copyright">
+                © 2025 PepTechnologies, Inc.
+            </div>
+            <!-- Links as text -->
+            <div class="footer-links">
+            <span>Terms</span>
+            <span>Privacy</span>
+            <span>Security</span>
+            <span>Contact</span>
+            <span>Manage cookies</span>
+        </div>
         </div>
     </div>
 </div>
@@ -396,6 +421,24 @@
             document.getElementById('section-spinner').style.display = 'none';
             document.getElementById('modal-section-submit').disabled = false;
         });
+
+        // Get CSRF token dynamically
+    const csrfToken = document.querySelector('#modalSectionForm input[name="csrf_token"]').value;
+
+    // Use URLSearchParams instead of FormData
+    const params = new URLSearchParams();
+    params.append('spreadsheet_id', spreadsheetSelect.value);
+    params.append('section_name', sectionNameInput.value.trim());
+    params.append('csrf_token', csrfToken);
+
+    fetch(createSectionUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params
+    })
+
     });
 </script>
 
@@ -702,120 +745,137 @@
         color: #dc3545;
     }
 
-    /* Responsive adjustments */
+  /* Footer styles - Horizontal layout */
+    .footer-container {
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 20px 0;
+        margin-top: 40px;
+    }
+
+    .footer-content {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        gap: 30px;
+    }
+
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        margin: 0;
+    }
+
+    .logo-image {
+        height: 30px;
+        width: auto;
+    }
+
+    .copyright {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    .footer-links {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 20px;
+    }
+
+    .footer-links span {
+        color: #495057;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    /* Responsive adjustments for footer */
     @media (max-width: 1200px) {
-        .dashboard-layout {
-            grid-template-columns: 30% 38% 32%;
+        .footer-content {
+            gap: 20px;
+        }
+
+        .footer-links {
+            gap: 15px;
         }
     }
 
     @media (max-width: 992px) {
-        .dashboard-layout {
-            grid-template-columns: 1fr;
-        }
-        .sidebar {
-            margin-bottom: 1.5rem;
-        }
-        .dashboard-header h1 {
-            font-size: 18px;
+        .footer-content {
+            gap: 15px;
         }
 
-        .action-container {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-            padding: 0.5rem;
+        .footer-links {
+            gap: 12px;
         }
 
-        .action-title {
-            margin-bottom: 0.5rem;
+        .logo-image {
+            height: 25px;
         }
 
-        .quick-stats-container {
-            margin-left: 0;
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        /* Adjust image container for mobile */
-        .left-sidebar {
-            height: 300px; /* Fixed height on mobile */
+        .copyright, .footer-links span {
+            font-size: 0.85rem;
         }
     }
 
     @media (max-width: 768px) {
-        body {
-            padding-top: 120px; /* More padding for mobile */
+        .footer-content {
+            gap: 12px;
+            padding: 0 15px;
         }
 
-        .dashboard-header-container {
-            height: auto;
-            flex-direction: column;
-            padding: 10px;
+        .footer-links {
+            gap: 10px;
         }
 
-        .action-bar {
-            top: 80px; /* Adjusted for mobile header height */
+        .logo-image {
+            height: 22px;
         }
 
-        .quick-stats-container {
-            gap: 8px;
-        }
-
-        .stat-item {
-            padding: 6px 8px;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-        }
-
-        .stat-value {
+        .copyright, .footer-links span {
             font-size: 0.8rem;
-        }
-
-        /* Adjust image container height for tablets */
-        .left-sidebar {
-            height: 250px;
         }
     }
 
     @media (max-width: 576px) {
-        body {
-            padding-top: 140px; /* Even more padding for small mobile */
+        .footer-content {
+            gap: 8px;
+            padding: 0 10px;
         }
 
-        .action-bar {
-            top: 100px; /* Adjusted for small mobile */
-            padding: 0.5rem;
+        .footer-links {
+            gap: 8px;
         }
 
-        .action-link {
-            padding: 0.3rem 0.6rem;
-            font-size: 0.9rem;
+        .logo-image {
+            height: 20px;
         }
 
-        .section-pill {
-            font-size: 18px;
-            padding: 6px 12px;
-            margin: 1px;
-        }
-
-        .quick-stats-container {
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .stat-item {
-            flex: 1 1 calc(50% - 4px);
-            min-width: 120px;
-        }
-
-        /* Adjust image container height for mobile */
-        .left-sidebar {
-            height: 200px;
+        .copyright, .footer-links span {
+            font-size: 0.75rem;
         }
     }
+
+    @media (max-width: 480px) {
+        .footer-content {
+            gap: 6px;
+            padding: 0 5px;
+        }
+
+        .footer-links {
+            gap: 6px;
+        }
+
+        .copyright, .footer-links span {
+            font-size: 0.7rem;
+        }
+    }
+
 </style>
 
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

@@ -480,18 +480,15 @@ def get_stats():
 @main_bp.route('/create_section', methods=['POST'])
 @login_required
 def create_section():
-    """Section creation with validation and verification"""
     try:
-        data = request.get_json()
-        logger.debug(f"Create section request: {data}")
+        # Change from request.get_json() to request.form
+        spreadsheet_id = request.form.get('spreadsheet_id')
+        section_name = request.form.get('section_name')
 
-        # Validate input
-        required_fields = ['spreadsheet_id', 'section_name']
-        if not all(field in data for field in required_fields):
-            logger.error("Missing required fields for section creation")
+        if not spreadsheet_id or not section_name:
             return jsonify({
                 "status": "error",
-                "message": "Spreadsheet ID and section name are required"
+                "message": "Missing required fields"
             }), 400
 
         spreadsheet_id = data['spreadsheet_id']
