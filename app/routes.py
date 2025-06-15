@@ -340,6 +340,7 @@ def dashboard_section(section_name):
             'status': link.status or 'unknown'
         } for link in links]
 
+
         # Calculate stats
         last_upload = max(
             [s.created_at for s in user_spreadsheets],

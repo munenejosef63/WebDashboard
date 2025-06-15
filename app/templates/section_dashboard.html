@@ -1051,14 +1051,14 @@
 
                         resultItem.innerHTML = `
                             <div class="search-result-title">${link.title}</div>
-                            <div class="search-result-url">${link.link}</div>
+                            <div class="search-result-url">${link.url}</div>
                         `;
 
                         resultItem.addEventListener('click', function() {
                             // Populate edit form
                             document.getElementById('editLinkId').value = link.id;
                             document.getElementById('editTitle').value = link.title;
-                            document.getElementById('editUrl').value = link.link;
+                            document.getElementById('editUrl').value = link.url;
                             document.getElementById('editStatus').value = link.status;
 
                             // Show edit form
