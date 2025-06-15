@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% block title %}DashboardSections{% endblock %}
 {% block content %}
@@ -13,852 +14,901 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        :root {
-            --primary-color: #4361ee;
-            --primary-dark: #3a56d4;
-            --secondary-color: #6c757d;
-            --success-color: #06d6a0;
-            --danger-color: #ef476f;
-            --warning-color: #ffd166;
-            --info-color: #118ab2;
-            --dark-bg: #1a202c;
-            --darker-bg: #131720;
-            --card-bg: #2d3748;
-            --card-border: #3d4758;
-            --text-light: #e2e8f0;
-            --text-muted: #a0aec0;
-            --light-bg: #f8f9fa;
-            --light-border: #4a5568;
-            --white: #ffffff;
-            --orange-bg: #FFE0B2;
-            --shadow-light: 0 2px 10px rgba(0,0,0,0.15);
-            --shadow-medium: 0 5px 15px rgba(0,0,0,0.2);
-            --transition: all 0.3s ease;
-        }
+   <style>
+    :root {
+        --primary-color: #4361ee;
+        --primary-dark: #3a56d4;
+        --secondary-color: #6c757d;
+        --success-color: #06d6a0;
+        --danger-color: #ef476f;
+        --warning-color: #ffd166;
+        --info-color: #118ab2;
+        --dark-bg: #1a202c;
+        --darker-bg: #131720;
+        --card-bg: #2d3748;
+        --card-border: #3d4758;
+        --text-light: #e2e8f0;
+        --text-muted: #a0aec0;
+        --light-bg: #f8f9fa;
+        --light-border: #4a5568;
+        --white: #ffffff;
+        --orange-bg: #FFE0B2;
+        --shadow-light: 0 2px 10px rgba(0,0,0,0.15);
+        --shadow-medium: 0 5px 15px rgba(0,0,0,0.2);
+        --transition: all 0.3s ease;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        /* Navigation container */
-        .nav-container {
-            background: #f8f9fa;
-            padding: 8px 1.5rem;
-            border-bottom: 1px solid #dee2e6;
-            position: sticky;
-            top: 0;
-            z-index: 99;
-            overflow-x: auto;
-            white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    body, html {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: 'Inter', sans-serif;
+    }
 
-        .home-icon-container {
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-        }
+    /* Navigation container */
+    .nav-container {
+        background: #f8f9fa;
+        padding: 8px 1.5rem;
+        border-bottom: 1px solid #dee2e6;
+        position: sticky;
+        top: 0;
+        z-index: 99;
+        overflow-x: auto;
+        white-space: nowrap;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-        .home-icon {
-            width: 36px;
-            height: 36px;
-            background: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: var(--transition);
-            border: 1px solid #dee2e6;
-        }
+    .home-icon-container {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
 
-        .home-icon:hover {
-            background-color: var(--primary-color);
-            transform: scale(1.05);
-        }
+    .home-icon {
+        width: 36px;
+        height: 36px;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: var(--transition);
+        border: 1px solid #dee2e6;
+    }
 
-        .home-icon:hover img {
-            filter: invert(1);
-        }
+    .home-icon:hover {
+        background-color: var(--primary-color);
+        transform: scale(1.05);
+    }
 
-        .home-icon:active {
-            transform: scale(0.95);
-        }
+    .home-icon:hover img {
+        filter: invert(1);
+    }
 
-        .home-icon img {
-            width: 22px;
-            height: 22px;
-            transition: var(--transition);
-            display: block;
-        }
+    .home-icon:active {
+        transform: scale(0.95);
+    }
 
-        /* Section navigation */
-        .section-navigation {
-            display: inline-flex;
-            gap: 8px;
-            background: transparent;
-            padding: 0;
-            border-radius: 0;
-            flex-wrap: nowrap;
-            border: none;
-            min-width: 0;
-            flex: 1;
-        }
+    .home-icon img {
+        width: 22px;
+        height: 22px;
+        transition: var(--transition);
+        display: block;
+    }
 
-        .section-navigation .nav-button {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-block;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            font-size: 0.8rem;
-            font-weight: 500;
-            white-space: nowrap;
-        }
+    /* Section navigation */
+    .section-navigation {
+        display: inline-flex;
+        gap: 8px;
+        background: transparent;
+        padding: 0;
+        border-radius: 0;
+        flex-wrap: nowrap;
+        border: none;
+        min-width: 0;
+        flex: 1;
+    }
 
-        .section-navigation .nav-button:hover {
-            background-color: var(--primary-color);
-            color: var(--white);
-        }
+    .section-navigation .nav-button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        font-size: 0.8rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
 
-        .section-navigation .nav-button.active {
-            background-color: var(--primary-color);
-            color: var(--white);
-        }
+    .section-navigation .nav-button:hover {
+        background-color: var(--primary-color);
+        color: var(--white);
+    }
 
+    .section-navigation .nav-button.active {
+    background-color: var(--primary-color) !important;
+    color: var(--white) !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+}
+
+    /* Main dashboard layout */
+    .dashboard-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    .dashboard-content {
+        display: flex;
+        flex: 1;
+        gap: 20px;
+        padding: 15px 25px 25px;
+        max-width: 1600px;
+        margin: 0 auto;
+        width: 100%;
+        height: calc(100vh - 60px);
+        overflow: hidden;
+    }
+
+    .links-display-section {
+        flex: 1;
+        background-color: white;
+        padding: 5px 10px 10px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition);
+        border: 1px solid #dee2e6;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .scrollable-content {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .scrollable-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .scrollable-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .scrollable-content::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+
+    .scrollable-content::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    .card-title {
+        font-size: 0.8rem;
+        margin-bottom: 15px;
+        color: #212529;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+        flex-shrink: 0;
+    }
+
+    .card-title i {
+        background: var(--primary-color);
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    /* Header container for buttons */
+    .header-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .action-title {
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: #495057;
+        white-space: nowrap;
+    }
+
+    .action-link {
+        display: flex;
+        align-items: center;
+        color: #0d6efd;
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        white-space: nowrap;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .action-link:hover {
+        background-color: #e9ecef;
+        text-decoration: none;
+        color: #0a58ca;
+    }
+
+    .action-link i {
+        margin-right: 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    /* Edit link button specific styling */
+    .action-link.edit-link {
+        color: #ffc107;
+    }
+
+    .action-link.edit-link:hover {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #e0a800;
+    }
+
+    /* Updated Links Grid for 6+ items per row */
+    .links-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+        padding-bottom: 5px;
+    }
+
+    .link-button {
+        display: flex;
+        flex-direction: column;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: var(--transition);
+        box-shadow: var(--shadow-light);
+        border: 1px solid #e2e8f0;
+        min-height: 80px;
+        height: auto;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        transform: translateY(0);
+        cursor: pointer;
+    }
+
+    .link-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+        border-color: var(--primary-color);
+        background-color: var(--primary-color);
+        color: white;
+        z-index: 2;
+    }
+
+    .link-button:hover .link-title,
+    .link-button:hover .link-description,
+    .link-button:hover .status-badge {
+        color: white !important;
+    }
+
+    .link-button:hover .status-badge {
+        background: transparent !important;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .link-button:hover::before {
+        background: var(--primary-color);
+    }
+
+    .link-button:active {
+        transform: translateY(-1px);
+    }
+
+    .link-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+
+    .link-button.static::before {
+        background: linear-gradient(90deg, var(--info-color), #4cc9f0);
+    }
+
+    .link-button.urgent::before {
+        background: linear-gradient(90deg, var(--danger-color), #f72585);
+    }
+
+    .link-button.unknown::before {
+        background: linear-gradient(90deg, var(--secondary-color), #9d4edd);
+    }
+
+    .link-content {
+        padding: 10px 8px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        min-height: 0;
+        position: relative;
+        text-decoration: none;
+        gap: 6px;
+    }
+
+    .link-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #212529;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0;
+        padding: 0 2px;
+        width: 100%;
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    .link-description {
+        font-size: 0.7rem;
+        color: #6c757d;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0;
+        width: 100%;
+    }
+
+    .link-description:empty {
+        display: none;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: auto;
+        align-self: stretch;
+        transition: var(--transition);
+        border: 1px solid transparent;
+    }
+
+    .link-button:hover .badge-static {
+        background: rgba(6, 214, 160, 0.25);
+    }
+
+    .link-button:hover .badge-urgent {
+        background: rgba(239, 71, 111, 0.25);
+    }
+
+    .link-button:hover .badge-unknown {
+        background: rgba(108, 117, 125, 0.25);
+    }
+
+    .empty-state {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 0;
+        text-align: center;
+        color: #6c757d;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        color: #a0aec0;
+        margin-bottom: 20px;
+    }
+
+    /* Modal styles remain unchanged */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+    }
+
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-content {
+        background: white;
+        width: 90%;
+        max-width: 500px;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-medium);
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-content {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .modal-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #212529;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .modal-title i {
+        background: var(--primary-color);
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6c757d;
+        transition: var(--transition);
+    }
+
+    .close-modal:hover {
+        color: var(--danger-color);
+        transform: rotate(90deg);
+    }
+
+    .success-message {
+        display: none;
+        background: rgba(6, 214, 160, 0.15);
+        color: var(--success-color);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 20px;
+        font-weight: 500;
+    }
+
+    .delete-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: rgba(255, 255, 255, 0.8);
+        border: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        opacity: 0;
+        z-index: 3;
+        font-size: 0.7rem;
+    }
+
+    .link-button:hover .delete-btn {
+        opacity: 1;
+    }
+
+    .delete-btn:hover {
+        background: var(--danger-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .confirmation-modal .modal-content {
+        max-width: 400px;
+    }
+
+    .confirmation-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .confirm-btn, .cancel-btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+    }
+
+    .confirm-btn {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .confirm-btn:hover {
+        background: #d32f2f;
+        transform: translateY(-2px);
+    }
+
+    .cancel-btn {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .cancel-btn:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+    }
+
+    /* Search results styling */
+    .search-results {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-top: 10px;
+        display: none;
+    }
+
+    .search-result-item {
+        padding: 10px 15px;
+        border-bottom: 1px solid #dee2e6;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .search-result-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+
+    .search-result-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+    }
+
+    .search-result-url {
+        font-size: 0.8rem;
+        color: #6c757d;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Responsive adjustments */
+    @media (min-width: 1200px) {
+        .links-grid {
+            grid-template-columns: repeat(6, 1fr);
+        }
+    }
+
+    @media (max-width: 1199px) {
+        .links-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+    }
+
+    @media (max-width: 992px) {
         .dashboard-content {
-            display: flex;
-            flex: 1;
-            gap: 20px;
-            padding: 15px 25px 25px;
-            max-width: 1600px;
-            margin: 0 auto;
-            width: 100%;
-            min-height: 0;
+            flex-direction: column;
         }
 
         .links-display-section {
-            flex: 1;
-            background-color: white;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: var(--shadow-light);
-            transition: var(--transition);
-            border: 1px solid #dee2e6;
-            display: flex;
+            min-height: 500px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-header {
             flex-direction: column;
-            min-height: 0;
-            height: 100%;
-            width: 100%;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 1.5rem;
         }
 
-        .card-title {
-            font-size: 0.8rem;
-            margin-bottom: 15px;
-            color: #212529;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
-            flex-shrink: 0;
+        .header-left {
+            flex-direction: column;
+            align-items: flex-start;
         }
 
-        .card-title i {
-            background: var(--primary-color);
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
+        .section-title {
+            font-size: 1.2rem;
         }
 
-        /* Header container for buttons */
-        .header-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
+        .nav-container {
+            padding: 8px 1.5rem;
         }
 
-        .action-title {
-            font-weight: 600;
-            font-size: 0.8rem;
-            color: #495057;
-            white-space: nowrap;
-        }
-
-        .action-link {
-            display: flex;
-            align-items: center;
-            color: #0d6efd;
-            text-decoration: none;
-            font-size: 0.8rem;
-            transition: all 0.2s ease;
-            padding: 0.4rem 0.8rem;
-            border-radius: 4px;
-            white-space: nowrap;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .action-link:hover {
-            background-color: #e9ecef;
-            text-decoration: none;
-            color: #0a58ca;
-        }
-
-        .action-link i {
-            margin-right: 0.4rem;
-            font-size: 0.8rem;
-        }
-
-        /* Edit link button specific styling */
-        .action-link.edit-link {
-            color: #ffc107;
-        }
-
-        .action-link.edit-link:hover {
-            background-color: rgba(255, 193, 7, 0.1);
-            color: #e0a800;
+        .section-navigation .nav-button {
+            padding: 8px 12px;
+            font-size: 0.7rem;
         }
 
         .links-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 5px;
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-bottom: 5px;
-        }
-
-        .link-button {
-            display: flex;
-            flex-direction: column;
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            transition: var(--transition);
-            box-shadow: var(--shadow-light);
-            border: 1px solid #e2e8f0;
-            min-height: 50px;
-            height: auto;
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-            transform: translateY(0);
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .link-button:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 25px rgba(67, 97, 238, 0.2);
-            border-color: var(--primary-color);
-            background-color: var(--primary-color);
-            color: white;
-            z-index: 2;
-        }
-
-        .link-button:hover .link-title,
-        .link-button:hover .link-description,
-        .link-button:hover .status-badge {
-            color: white !important;
-        }
-
-        .link-button:hover .status-badge {
-            background: transparent !important;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-
-        .link-button:hover::before {
-            background: var(--primary-color);
-        }
-
-        .link-button:active {
-            transform: translateY(-4px);
-        }
-
-        .link-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-        }
-
-        .link-button.static::before {
-            background: linear-gradient(90deg, var(--info-color), #4cc9f0);
-        }
-
-        .link-button.urgent::before {
-            background: linear-gradient(90deg, var(--danger-color), #f72585);
-        }
-
-        .link-button.unknown::before {
-            background: linear-gradient(90deg, var(--secondary-color), #9d4edd);
-        }
-
-        .link-content {
-            padding: 15px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            min-height: 0;
-            position: relative;
-            text-decoration: none;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 10px;
         }
 
+        .link-button {
+            min-height: 70px;
+        }
+
         .link-title {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #212529;
-            line-height: 1.4;
-            overflow-wrap: anywhere;
-            hyphens: auto;
-            word-break: break-word;
-            max-width: 100%;
-            padding: 0 5px;
-            transition: color 0.3s ease;
-            margin: 0;
+            font-size: 0.7rem;
         }
 
         .link-description {
-            font-size: 0.85rem;
-            color: #6c757d;
-            line-height: 1.5;
-            transition: color 0.3s ease;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-            margin: 0;
+            font-size: 0.65rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-header h1 {
+            font-size: 1.4rem;
         }
 
-        .link-description:empty {
-            display: none;
+        .card-title {
+            font-size: 1.2rem;
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: auto;
-            align-self: stretch;
-            transition: var(--transition);
-            border: 1px solid transparent;
-        }
-        .link-button:hover .badge-static {
-            background: rgba(6, 214, 160, 0.25);
-            transform: translateX(5px);
-        }
-
-        .link-button:hover .badge-urgent {
-            background: rgba(239, 71, 111, 0.25);
-            transform: translateX(5px);
-        }
-
-        .link-button:hover .badge-unknown {
-            background: rgba(108, 117, 125, 0.25);
-            transform: translateX(5px);
-        }
-
-        .empty-state {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 0;
-            text-align: center;
-            color: #6c757d;
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            color: #a0aec0;
-            margin-bottom: 20px;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
+        .link-content {
+            padding: 8px 6px;
         }
 
         .modal-content {
-            background: white;
-            width: 90%;
-            max-width: 500px;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: var(--shadow-medium);
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
+            padding: 20px;
         }
 
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
+        .nav-container {
+            padding: 8px 0.8rem;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #dee2e6;
+        .action-link {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.7rem;
         }
 
-        .modal-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #212529;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .header-container {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
         }
 
-        .modal-title i {
-            background: var(--primary-color);
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
+        .links-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #6c757d;
-            transition: var(--transition);
-        }
-
-        .close-modal:hover {
-            color: var(--danger-color);
-            transform: rotate(90deg);
-        }
-
-        .success-message {
-            display: none;
-            background: rgba(6, 214, 160, 0.15);
-            color: var(--success-color);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 20px;
-            font-weight: 500;
-        }
-
-        .delete-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.8);
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-            opacity: 0;
-            z-index: 3;
-        }
-
-        .link-button:hover .delete-btn {
-            opacity: 1;
-        }
-
-        .delete-btn:hover {
-            background: var(--danger-color);
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .confirmation-modal .modal-content {
-            max-width: 400px;
-        }
-
-        .confirmation-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .confirm-btn, .cancel-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-        }
-
-        .confirm-btn {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .confirm-btn:hover {
-            background: #d32f2f;
-            transform: translateY(-2px);
-        }
-
-        .cancel-btn {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .cancel-btn:hover {
-            background: #e0e0e0;
-            transform: translateY(-2px);
-        }
-
-        /* Search results styling */
-        .search-results {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .search-result-item {
-            padding: 10px 15px;
-            border-bottom: 1px solid #dee2e6;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .search-result-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .search-result-item:last-child {
-            border-bottom: none;
-        }
-
-        .search-result-title {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 4px;
-        }
-
-        .search-result-url {
-            font-size: 0.8rem;
-            color: #6c757d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 1200px) {
-            .dashboard-content {
-                padding: 20px;
-            }
-
-            .links-grid {
-                grid-auto-rows: minmax(auto, auto);
-            }
-        }
-
-        @media (max-width: 992px) {
-            .dashboard-content {
-                flex-direction: column;
-            }
-
-            .links-display-section {
-                min-height: 500px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-                padding: 1.5rem;
-            }
-
-            .header-left {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .section-title {
-                font-size: 1.2rem;
-            }
-
-            .nav-container {
-                padding: 8px 1.5rem;
-            }
-
-            .section-navigation .nav-button {
-                padding: 8px 12px;
-                font-size: 0.7rem;
-            }
-
-            .links-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 15px;
-            }
-            .link-button {
-                min-height: 100px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .dashboard-header h1 {
-                font-size: 1.4rem;
-            }
-
-            .card-title {
-                font-size: 1.2rem;
-            }
-
-            .link-content {
-                padding: 15px 12px 12px;
-            }
-
-            .modal-content {
-                padding: 20px;
-            }
-
-            .nav-container {
-                padding: 8px 0.8rem;
-            }
-
-            .action-link {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.7rem;
-            }
-
-            .header-container {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .link-title {
-                padding: 0 8px;
-            }
-
-            .home-icon img {
-                width: 18px;
-                height: 18px;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
-    <!-- Navigation container -->
-    <div class="nav-container">
-        <div class="home-icon-container">
-            <a href="http://127.0.0.1:5000/dashboard" class="home-icon" title="Back to Main Dashboard">
-                <img src="{{ url_for('static', filename='images/home_icon.png') }}" alt="Home Icon">
-            </a>
+    <div class="dashboard-container">
+        <!-- Navigation container -->
+        <div class="nav-container">
+            <div class="home-icon-container">
+                <a href="http://127.0.0.1:5000/dashboard" class="home-icon" title="Back to Main Dashboard">
+                    <img src="{{ url_for('static', filename='images/home_icon.png') }}" alt="Home Icon">
+                </a>
+            </div>
+
+            <nav class="section-navigation">
+                {% for section in sections %}
+                    <a href="{{ url_for('main.dashboard_section', section_name=section.name) }}"
+                       class="nav-button {% if section.id == current_section.id %}active{% endif %}">
+                        {{ section.name }}
+                    </a>
+                {% endfor %}
+            </nav>
         </div>
 
-        <nav class="section-navigation">
-            {% for section in sections %}
-                <a href="{{ url_for('main.dashboard_section', section_name=section.name) }}"
-                   class="nav-button {% if section.id == current_section.id %}active{% endif %}">
-                    {{ section.name }}
-                </a>
-            {% endfor %}
-        </nav>
+        <div class="dashboard-content">
+            <div class="links-display-section">
+                <div class="card-title">
+                    <div class="header-container">
+                        <i class="bi bi-link-45deg"></i>
+                        <span class="action-title">Current Links</span>
+                        <div style="display: flex; gap: 8px;">
+                            <!-- New Link Button -->
+                            <button class="action-link" id="addLinkButton">
+                                <i class="bi bi-plus-lg"></i>
+                                <span>New Link</span>
+                            </button>
+
+                            <!-- Edit Link Button -->
+                            <button class="action-link edit-link" id="editLinkButton">
+                                <i class="bi bi-pencil"></i>
+                                <span>Edit Link</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scrollable-content">
+                    {% if data %}
+                        <div class="links-grid" id="linksContainer">
+                            {% for row in data %}
+                            <div class="link-button {{ row.status }}" data-link-id="{{ row.id }}">
+                                <a href="{{ row.link }}" target="_blank" class="link-content">
+                                    <div class="link-title">{{ row.title }}</div>
+                                    <div class="link-description">{{ row.description or '' }}</div>
+                                </a>
+                                <button class="delete-btn" title="Delete Link" data-link-id="{{ row.id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="bi bi-link-45deg"></i>
+                            </div>
+                            <p>No links found in this section. Add some using the New Link button!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="dashboard-content">
-        <div class="links-display-section">
-            <div class="card-title">
-                <div class="header-container">
-                    <i class="bi bi-link-45deg"></i>
-                    <span class="action-title">Current Links</span>
-                    <div style="display: flex; gap: 8px;">
-                        <!-- New Link Button -->
-                        <button class="action-link" id="addLinkButton">
-                            <i class="bi bi-plus-lg"></i>
-                            <span>New Link</span>
-                        </button>
-
-                        <!-- Edit Link Button -->
-                        <button class="action-link edit-link" id="editLinkButton">
-                            <i class="bi bi-pencil"></i>
-                            <span>Edit Link</span>
-                        </button>
-                    </div>
-                </div>
+    <!-- Add Link Modal -->
+    <div class="modal-overlay" id="addLinkModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="bi bi-plus-lg"></i>
+                    Add New Link
+                </h2>
+                <button class="close-modal" id="closeModal">&times;</button>
             </div>
-
-            <!-- Add Link Modal -->
-            <div class="modal-overlay" id="addLinkModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">
-                            <i class="bi bi-plus-lg"></i>
-                            Add New Link
-                        </h2>
-                        <button class="close-modal" id="closeModal">&times;</button>
-                    </div>
-                    <form id="addLinkForm">
-                        <input type="hidden" name="section_id" value="{{ current_section.id }}">
-                        <div class="form-group">
-                            <label class="form-label" for="title">Link Title</label>
-                            <input type="text" class="form-control" name="title" id="title" placeholder="Enter link title" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="url">Link URL</label>
-                            <input type="url" class="form-control" name="url" id="url" placeholder="https://example.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="status">Status</label>
-                            <select class="form-control" name="status" id="status" required>
-                                <option value="" disabled selected>Select status...</option>
-                                <option value="static">Static</option>
-                                <option value="urgent">Urgent</option>
-                                <option value="unknown">Unknown</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i>
-                            Add Link
-                        </button>
-                        <div class="success-message" id="successMessage">
-                            New Link added successfully!
-                        </div>
-                    </form>
+            <form id="addLinkForm">
+                <input type="hidden" name="section_id" value="{{ current_section.id }}">
+                <div class="form-group">
+                    <label class="form-label" for="title">Link Title</label>
+                    <input type="text" class="form-control" name="title" id="title" placeholder="Enter link title" required>
                 </div>
+                <div class="form-group">
+                    <label class="form-label" for="url">Link URL</label>
+                    <input type="url" class="form-control" name="url" id="url" placeholder="https://example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="status">Status</label>
+                    <select class="form-control" name="status" id="status" required>
+                        <option value="" disabled selected>Select status...</option>
+                        <option value="static">Static</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="unknown">Unknown</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Add Link
+                </button>
+                <div class="success-message" id="successMessage">
+                    New Link added successfully!
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Link Modal -->
+    <div class="modal-overlay" id="editLinkModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="bi bi-pencil"></i>
+                    Edit Link
+                </h2>
+                <button class="close-modal" id="closeEditModal">&times;</button>
             </div>
-
-            <!-- Edit Link Modal -->
-            <div class="modal-overlay" id="editLinkModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">
-                            <i class="bi bi-pencil"></i>
-                            Edit Link
-                        </h2>
-                        <button class="close-modal" id="closeEditModal">&times;</button>
-                    </div>
-                    <form id="editLinkForm">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <!-- Search section -->
-                        <div class="form-group">
-                            <label class="form-label" for="searchQuery">Search Links</label>
-                            <input type="text" class="form-control" id="searchQuery" placeholder="Search by title or URL">
-                            <div class="search-results" id="searchResults"></div>
-                        </div>
-
-                        <!-- Edit form (initially hidden) -->
-                        <div id="editFormSection" style="display: none;">
-                            <input type="hidden" name="link_id" id="editLinkId">
-                            <div class="form-group">
-                                <label class="form-label" for="editTitle">Link Title</label>
-                                <input type="text" class="form-control" name="title" id="editTitle" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="editUrl">Link URL</label>
-                                <input type="url" class="form-control" name="url" id="editUrl" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="editStatus">Status</label>
-                                <select class="form-control" name="status" id="editStatus" required>
-                                    <option value="static">Static</option>
-                                    <option value="urgent">Urgent</option>
-                                    <option value="unknown">Unknown</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-warning">
-                                <i class="bi bi-save"></i>
-                                Update Link
-                            </button>
-                            <div class="success-message" id="editSuccessMessage">
-                                Link updated successfully!
-                            </div>
-                        </div>
-                    </form>
+            <form id="editLinkForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <!-- Search section -->
+                <div class="form-group">
+                    <label class="form-label" for="searchQuery">Search Links</label>
+                    <input type="text" class="form-control" id="searchQuery" placeholder="Search by title or URL">
+                    <div class="search-results" id="searchResults"></div>
                 </div>
-            </div>
 
-            {% if data %}
-                <div class="links-grid" id="linksContainer">
-                    {% for row in data %}
-                    <div class="link-button {{ row.status }}" data-link-id="{{ row.id }}">
-                        <a href="{{ row.link }}" target="_blank" class="link-content">
-                            <div class="link-title">{{ row.title }}</div>
-                            <div class="link-description">{{ row.description or '' }}</div>
-                        </a>
-                        <button class="delete-btn" title="Delete Link" data-link-id="{{ row.id }}">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                <!-- Edit form (initially hidden) -->
+                <div id="editFormSection" style="display: none;">
+                    <input type="hidden" name="link_id" id="editLinkId">
+                    <div class="form-group">
+                        <label class="form-label" for="editTitle">Link Title</label>
+                        <input type="text" class="form-control" name="title" id="editTitle" required>
                     </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="bi bi-link-45deg"></i>
+                    <div class="form-group">
+                        <label class="form-label" for="editUrl">Link URL</label>
+                        <input type="url" class="form-control" name="url" id="editUrl" required>
                     </div>
-                    <p>No links found in this section. Add some using the New Link button!</p>
+                    <div class="form-group">
+                        <label class="form-label" for="editStatus">Status</label>
+                        <select class="form-control" name="status" id="editStatus" required>
+                            <option value="static">Static</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-save"></i>
+                        Update Link
+                    </button>
+                    <div class="success-message" id="editSuccessMessage">
+                        Link updated successfully!
+                    </div>
                 </div>
-            {% endif %}
+            </form>
         </div>
     </div>
 
@@ -996,7 +1046,7 @@
                         resultItem.className = 'search-result-item';
                         resultItem.dataset.id = link.id;
                         resultItem.dataset.title = link.title;
-                        resultItem.dataset.url = link.link;
+                        resultItem.dataset.url = link.url;
                         resultItem.dataset.status = link.status;
 
                         resultItem.innerHTML = `
@@ -1070,8 +1120,6 @@
                 showToast('An error occurred. Please try again.', 'error');
             }
         });
-
-        // ... (rest of JavaScript remains the same) ...
 
         // Confirmation modal and other existing JavaScript code
         const confirmationModal = document.getElementById('confirmationModal');

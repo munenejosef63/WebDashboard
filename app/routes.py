@@ -336,7 +336,7 @@ def dashboard_section(section_name):
         data = [{
             'id': link.id,
             'title': link.title,
-            'link': link.link,
+            'url': link.link,
             'status': link.status or 'unknown'
         } for link in links]
 
