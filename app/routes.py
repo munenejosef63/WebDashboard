@@ -13,6 +13,7 @@ from app.models import Spreadsheet, Sheet, Link, db, get_quick_stats
 from .utils import allowed_file, process_uploaded_file
 from .utils import UPLOAD_PROGRESS
 from flask import send_from_directory
+from sqlalchemy import or_
 
 # Configure detailed logging
 logging.basicConfig(
@@ -335,7 +336,7 @@ def dashboard_section(section_name):
         data = [{
             'id': link.id,
             'title': link.title,
-            'url': link.link,
+            'link': link.link,
             'status': link.status or 'unknown'
         } for link in links]
 
@@ -749,3 +750,141 @@ def download_template():
         as_attachment=True,
         download_name='WebLinks_Upload_Template.xlsx'
     )
+
+
+@main_bp.route('/search_links', methods=['GET'])
+@login_required
+def search_links():
+    """Search links by title or URL with ownership verification"""
+    try:
+        query = request.args.get('query', '').strip()
+        section_id = request.args.get('section_id', type=int)
+
+        logger.info(f"Searching links for user: {current_user.id} | Query: '{query}' | Section: {section_id}")
+
+        # Validate input
+        if not query or not section_id:
+            logger.debug("Missing query or section_id")
+            return jsonify([]), 200
+
+        # Verify section belongs to user
+        section = Sheet.query \
+            .join(Spreadsheet) \
+            .filter(
+            Sheet.id == section_id,
+            Spreadsheet.user_id == current_user.id
+        ).first()
+
+        if not section:
+            logger.warning(f"Section not found or access denied: {section_id}")
+            return jsonify({
+                "status": "error",
+                "message": "Section not found or access denied"
+            }), 404
+
+        # Search in both title and URL fields
+        results = Link.query.filter(
+            Link.sheet_id == section_id,
+            or_(
+                Link.title.ilike(f'%{query}%'),
+                Link.link.ilike(f'%{query}%')
+            )
+        ).all()
+
+        # Format results for JSON response
+        links = [{
+            'id': link.id,
+            'title': link.title,
+            'url': link.link,
+            'status': link.status or 'unknown'
+        } for link in results]
+
+        logger.info(f"Found {len(links)} matching links")
+        return jsonify(links)
+
+    except SQLAlchemyError as e:
+        logger.error(f"Database search error: {str(e)}", exc_info=True)
+        return jsonify({
+            "status": "error",
+            "message": "Database operation failed"
+        }), 500
+    except Exception as e:
+        logger.error(f"Search error: {str(e)}", exc_info=True)
+        return jsonify({
+            "status": "error",
+            "message": "System error during search"
+        }), 500
+
+
+@main_bp.route('/update_link', methods=['POST'])
+@login_required
+def update_link():
+    """Update a link with ownership verification"""
+    try:
+        data = request.get_json()
+        link_id = data.get('id')
+        title = data.get('title')
+        url = data.get('url')
+        status = data.get('status')
+
+        logger.info(f"Updating link: {link_id} | User: {current_user.id}")
+        logger.debug(f"Update data: {data}")
+
+        # Validate input
+        if not link_id or not title or not url or not status:
+            logger.error("Missing required fields in update request")
+            return jsonify({
+                "status": "error",
+                "message": "Missing required fields"
+            }), 400
+
+        # Find the link to update and verify ownership
+        link = Link.query \
+            .join(Sheet) \
+            .join(Spreadsheet) \
+            .filter(
+            Link.id == link_id,
+            Spreadsheet.user_id == current_user.id
+        ).first()
+
+        if not link:
+            logger.warning(f"Link not found or access denied: {link_id}")
+            return jsonify({
+                "status": "error",
+                "message": "Link not found or access denied"
+            }), 404
+
+        # Update the link
+        link.title = title
+        link.link = url
+        link.status = status
+
+        # Commit changes to database
+        db.session.commit()
+        logger.info(f"Link updated successfully: ID {link_id}")
+
+        return jsonify({
+            "status": "success",
+            "message": "Link updated successfully",
+            "link": {
+                "id": link.id,
+                "title": link.title,
+                "url": link.link,
+                "status": link.status
+            }
+        })
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"Database update error: {str(e)}", exc_info=True)
+        return jsonify({
+            "status": "error",
+            "message": "Database operation failed"
+        }), 500
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Update error: {str(e)}", exc_info=True)
+        return jsonify({
+            "status": "error",
+            "message": "System error during update"
+        }), 500
