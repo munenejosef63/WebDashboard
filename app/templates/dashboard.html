@@ -14,27 +14,6 @@
          style="display: none;">
     </div>
 
-  <!-- Fixed Dashboard Header -->
-<div class="dashboard-header-container">
-    <div class="dashboard-header">
-        <h1>
-            <img src="{{ url_for('static', filename='images/dashboard_logo1.png') }}"
-                 class="rounded-circle me-2"
-                 alt="Dashboard Logo"
-                 style="width: 2.5em; height: 2.5em; object-fit: contain;">
-            {% set owner_name = current_user.username.replace('Dashboard', '') %}
-            {{ owner_name }}'s WebLinks Main Dashboard
-        </h1>
-    </div>
-    <div class="logout-container">
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary logout-btn">
-            <i class="bi bi-box-arrow-right me-2"></i>Logout
-        </a>
-    </div>
-</div>
-
-
-
     <!-- Fixed Action Bar -->
     <div class="action-bar">
         <div class="action-container">
@@ -303,30 +282,6 @@
 
         </div>
 
-        <!-- Footer Container -->
-        <div class="footer-container">
-            <div class="footer-content">
-                <!-- Logo Image -->
-                <div class="footer-logo">
-                    <img src="{{ url_for('static', filename='images/dashboard_logo1.png') }}"
-                         alt="PepTechnologies Logo"
-                         class="logo-image">
-                </div>
-
-                <!-- Copyright -->
-                <div class="copyright">
-                    © 2025 PepTechnologies, Inc.
-                </div>
-                <!-- Links as text -->
-                <div class="footer-links">
-                <span>Terms</span>
-                <span>Privacy</span>
-                <span>Security</span>
-                <span>Contact</span>
-                <span>Manage cookies</span>
-            </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -789,33 +744,6 @@ body {
     overflow-y: auto; /* Enable vertical scrolling */
 }
 
-/* ===== DASHBOARD HEADER ===== */
-.dashboard-header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: #F0FFFF;
-    padding: 15px;
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    height: 60px;
-}
-
-.dashboard-header h1 {
-    font-size: 1.0rem;
-    font-weight: 600;
-    margin: 0;
-    color: #2c3e50;
-}
-
-.logout-btn {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-}
 
 /* ===== ACTION BAR ===== */
 .action-bar {
@@ -1082,78 +1010,13 @@ body {
     color: #dc3545;
 }
 
-/* ===== FOOTER ===== */
-.footer-container {
-    background-color: #f8f9fa;
-    border-top: 1px solid #dee2e6;
-    padding: 10px 0;
-    margin-top: 20px;
-}
-
-.footer-content {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 15px;
-}
-
-.footer-logo {
-    display: flex;
-    align-items: center;
-    margin: 0;
-}
-
-.logo-image {
-    height: 20px;
-    width: auto;
-}
-
-.copyright {
-    color: #6c757d;
-    font-size: 0.8rem;
-    margin: 0;
-    white-space: nowrap;
-}
-
-.footer-links {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 15px;
-}
-
-.footer-links span {
-    color: #495057;
-    font-size: 0.8rem;
-    white-space: nowrap;
-}
-
-/* ===== RESPONSIVE ADJUSTMENTS ===== */
-@media (max-width: 1200px) {
-    .footer-content {
-        gap: 10px;
-    }
-
-    .footer-links {
-        gap: 10px;
-    }
-}
 
 @media (max-width: 992px) {
     .dashboard-layout {
         grid-template-columns: 1fr;
     }
 
-    .footer-content {
-        gap: 8px;
-    }
 
-    .footer-links {
-        gap: 8px;
-    }
 
     .logo-image {
         height: 18px;
@@ -1177,18 +1040,6 @@ body {
         justify-content: center;
     }
 
-    .footer-content {
-        flex-direction: column;
-        gap: 6px;
-        padding: 0 15px;
-    }
-
-    .footer-links {
-        gap: 6px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
     .logo-image {
         height: 16px;
     }
@@ -1208,23 +1059,13 @@ body {
         padding: 6px 8px;
     }
 
-    .footer-content {
-        gap: 5px;
-        padding: 0 10px;
-    }
 
-    .footer-links {
-        gap: 5px;
-    }
 
     .logo-image {
         height: 14px;
     }
 
-    .copyright,
-    .footer-links span {
-        font-size: 0.7rem;
-    }
+
 }
 
 @media (max-width: 480px) {
@@ -1237,23 +1078,12 @@ body {
         text-align: center;
     }
 
-    .footer-content {
-        gap: 4px;
-        padding: 0 5px;
-    }
-
-    .footer-links {
-        gap: 4px;
-    }
 
     .logo-image {
         height: 12px;
     }
 
-    .copyright,
-    .footer-links span {
-        font-size: 0.65rem;
-    }
+
 }
 
 

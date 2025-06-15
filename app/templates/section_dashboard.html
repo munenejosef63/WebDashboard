@@ -43,83 +43,13 @@
             box-sizing: border-box;
         }
 
-        html, body {
-            height: 100%;
-        }
-
-        body {
-            /* Changed font to Inter */
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
-            background-color: var(--orange-bg);
-            color: #212529;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .dashboard-header {
-            background-color: #F0FFFF;
-            padding: 1.2rem 2.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #dee2e6;
-            box-shadow: var(--shadow-light);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            flex-shrink: 0;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-icon i {
-            font-size: 18px;
-            color: white;
-        }
-
-        .dashboard-header h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #212529;
-            margin: 0;
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        /* NEW: Navigation container */
+        /* UPDATED: Navigation container below header */
         .nav-container {
             background: #f8f9fa;
-            padding: 8px 2.5rem;
+            padding: 8px 1.5rem;
             border-bottom: 1px solid #dee2e6;
             position: sticky;
-            top: 70px; /* Height of header */
+            top: 0;
             z-index: 99;
             overflow-x: auto;
             white-space: nowrap;
@@ -165,8 +95,8 @@
         .dashboard-content {
             display: flex;
             flex: 1;
-            gap: 25px;
-            padding: 30px;
+            gap: 20px;
+            padding: 15px 25px 25px;
             max-width: 1600px;
             margin: 0 auto;
             width: 100%;
@@ -189,13 +119,13 @@
         }
 
         .card-title {
-            font-size: 1rem;
-            margin-bottom: 25px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
             color: #212529;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding-bottom: 15px;
+            gap: 8px;
+            padding-bottom: 10px;
             border-bottom: 1px solid #dee2e6;
             flex-shrink: 0;
         }
@@ -214,7 +144,7 @@
         .links-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 20px;
+            gap: 5px;
             flex-grow: 1;
             overflow-y: auto;
             padding-bottom: 5px;
@@ -293,13 +223,13 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Changed to center vertically */
+            justify-content: center;
             align-items: center;
             text-align: center;
             min-height: 0;
             position: relative;
             text-decoration: none;
-            gap: 10px; /* Added for consistent spacing */
+            gap: 10px;
         }
 
         .link-title {
@@ -313,7 +243,7 @@
             max-width: 100%;
             padding: 0 5px;
             transition: color 0.3s ease;
-            margin: 0; /* Removed margin for better centering */
+            margin: 0;
         }
 
         .link-description {
@@ -322,15 +252,14 @@
             line-height: 1.5;
             transition: color 0.3s ease;
             display: -webkit-box;
-            -webkit-line-clamp: 2; /* Limit to 2 lines */
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
-            margin: 0; /* Removed margin for better centering */
+            margin: 0;
         }
 
-        /* Hide description element if empty */
         .link-description:empty {
             display: none;
         }
@@ -364,27 +293,6 @@
             transform: translateX(5px);
         }
 
-        .main-dashboard-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition);
-            justify-content: center;
-        }
-
-        .main-dashboard-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        /* Floating action button */
         .floating-action {
             position: fixed;
             bottom: 30px;
@@ -410,7 +318,6 @@
             box-shadow: 0 10px 20px rgba(67, 97, 238, 0.5);
         }
 
-        /* Empty state styles */
         .empty-state {
             flex-grow: 1;
             display: flex;
@@ -428,7 +335,6 @@
             margin-bottom: 20px;
         }
 
-        /* Modal styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -508,7 +414,6 @@
             transform: rotate(90deg);
         }
 
-        /* Success message */
         .success-message {
             display: none;
             background: rgba(6, 214, 160, 0.15);
@@ -520,7 +425,6 @@
             font-weight: 500;
         }
 
-        /* Delete button styles */
         .delete-btn {
             position: absolute;
             top: 10px;
@@ -549,7 +453,6 @@
             transform: scale(1.1);
         }
 
-        /* Confirmation modal */
         .confirmation-modal .modal-content {
             max-width: 400px;
         }
@@ -628,10 +531,9 @@
                 font-size: 1.2rem;
             }
 
-            /* NEW: Adjust navigation container for mobile */
+            /* UPDATED: Only adjust padding for mobile */
             .nav-container {
                 padding: 8px 1.5rem;
-                top: 120px; /* Adjusted for mobile header height */
             }
 
             .section-navigation .nav-button {
@@ -665,9 +567,9 @@
                 padding: 20px;
             }
 
-            /* NEW: Adjust navigation for small screens */
+            /* UPDATED: Only adjust padding for small screens */
             .nav-container {
-                top: 140px; /* Adjusted for small screens */
+                padding: 8px 0.8rem;
             }
         }
 
@@ -679,22 +581,7 @@
     </style>
 </head>
 <body>
-    <div class="dashboard-header">
-        <div class="header-left">
-            <a href="{{ url_for('main.dashboard') }}" class="logo">
-                <div class="logo-icon">
-                    <i class="bi bi-speedometer2"></i>
-                </div>
-                <h1>Dashboard</h1>
-            </a>
-            <div class="section-title">{{ current_section.name }}</div>
-        </div>
-        <a href="{{ url_for('auth.logout') }}" class="main-dashboard-btn">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
-    </div>
-
-    <!-- NEW: Navigation container below header -->
+    <!-- Navigation container immediately below header -->
     <div class="nav-container">
         <nav class="section-navigation">
             {% for section in sections %}
@@ -708,10 +595,10 @@
 
     <div class="dashboard-content">
         <div class="links-display-section">
-            <h2 class="card-title">
+            <h3 class="card-title">
                 <i class="bi bi-link-45deg"></i>
                 Current Links
-            </h2>
+            </h3>
 
 {% if data %}
     <div class="links-grid" id="linksContainer">
@@ -802,7 +689,8 @@
         </div>
     </div>
 
-    <script>
+
+<script>
         document.addEventListener('DOMContentLoaded', function() {
             // Modal functionality
             const addLinkButton = document.getElementById('addLinkButton');
@@ -1021,6 +909,8 @@ confirmDelete.addEventListener('click', async function() {
             }, 3000);
         }
     </script>
+
+
 </body>
 
 {% endblock %}
