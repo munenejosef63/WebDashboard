@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 {% block title %}DashboardSections{% endblock %}
 {% block content %}
@@ -11,753 +10,653 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-   <style>
-    :root {
-        --primary-color: #4361ee;
-        --primary-dark: #3a56d4;
-        --secondary-color: #6c757d;
-        --success-color: #06d6a0;
-        --danger-color: #ef476f;
-        --warning-color: #ffd166;
-        --info-color: #118ab2;
-        --dark-bg: #1a202c;
-        --darker-bg: #131720;
-        --card-bg: #2d3748;
-        --card-border: #3d4758;
-        --text-light: #e2e8f0;
-        --text-muted: #a0aec0;
-        --light-bg: #f8f9fa;
-        --light-border: #4a5568;
-        --white: #ffffff;
-        --orange-bg: #FFE0B2;
-        --shadow-light: 0 2px 10px rgba(0,0,0,0.15);
-        --shadow-medium: 0 5px 15px rgba(0,0,0,0.2);
-        --transition: all 0.3s ease;
-    }
-
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body, html {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        font-family: 'Inter', sans-serif;
-    }
-
-    /* Navigation container */
-    .nav-container {
-        background: #f8f9fa;
-        padding: 8px 1.5rem;
-        border-bottom: 1px solid #dee2e6;
-        position: sticky;
-        top: 0;
-        z-index: 99;
-        overflow-x: auto;
-        white-space: nowrap;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .home-icon-container {
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-    }
-
-    .home-icon {
-        width: 36px;
-        height: 36px;
-        background: white;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-        transition: var(--transition);
-        border: 1px solid #dee2e6;
-    }
-
-    .home-icon:hover {
-        background-color: var(--primary-color);
-        transform: scale(1.05);
-    }
-
-    .home-icon:hover img {
-        filter: invert(1);
-    }
-
-    .home-icon:active {
-        transform: scale(0.95);
-    }
-
-    .home-icon img {
-        width: 22px;
-        height: 22px;
-        transition: var(--transition);
-        display: block;
-    }
-
-    /* Section navigation */
-    .section-navigation {
-        display: inline-flex;
-        gap: 8px;
-        background: transparent;
-        padding: 0;
-        border-radius: 0;
-        flex-wrap: nowrap;
-        border: none;
-        min-width: 0;
-        flex: 1;
-    }
-
-    .section-navigation .nav-button {
-        padding: 10px 16px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        text-align: center;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: inline-block;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        font-size: 0.8rem;
-        font-weight: 500;
-        white-space: nowrap;
-    }
-
-    .section-navigation .nav-button:hover {
-        background-color: var(--primary-color);
-        color: var(--white);
-    }
-
-    .section-navigation .nav-button.active {
-    background-color: var(--primary-color) !important;
-    color: var(--white) !important;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
-}
-
-    /* Main dashboard layout */
-    .dashboard-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-    }
-
-    .dashboard-content {
-        display: flex;
-        flex: 1;
-        gap: 20px;
-        padding: 15px 25px 25px;
-        max-width: 1600px;
-        margin: 0 auto;
-        width: 100%;
-        height: calc(100vh - 60px);
-        overflow: hidden;
-    }
-
-    .links-display-section {
-        flex: 1;
-        background-color: white;
-        padding: 5px 10px 10px;
-        border-radius: 16px;
-        box-shadow: var(--shadow-light);
-        transition: var(--transition);
-        border: 1px solid #dee2e6;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        overflow: hidden;
-    }
-
-    .scrollable-content {
-        flex: 1;
-        overflow-y: auto;
-        padding-right: 5px;
-    }
-
-    .scrollable-content::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .scrollable-content::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
-
-    .scrollable-content::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 4px;
-    }
-
-    .scrollable-content::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
-
-    .card-title {
-        font-size: 0.8rem;
-        margin-bottom: 15px;
-        color: #212529;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #dee2e6;
-        flex-shrink: 0;
-    }
-
-    .card-title i {
-        background: var(--primary-color);
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-    }
-
-    /* Header container for buttons */
-    .header-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .action-title {
-        font-weight: 600;
-        font-size: 0.8rem;
-        color: #495057;
-        white-space: nowrap;
-    }
-
-    .action-link {
-        display: flex;
-        align-items: center;
-        color: #0d6efd;
-        text-decoration: none;
-        font-size: 0.8rem;
-        transition: all 0.2s ease;
-        padding: 0.4rem 0.8rem;
-        border-radius: 4px;
-        white-space: nowrap;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-weight: 500;
-    }
-
-    .action-link:hover {
-        background-color: #e9ecef;
-        text-decoration: none;
-        color: #0a58ca;
-    }
-
-    .action-link i {
-        margin-right: 0.4rem;
-        font-size: 0.8rem;
-    }
-
-    /* Edit link button specific styling */
-    .action-link.edit-link {
-        color: #ffc107;
-    }
-
-    .action-link.edit-link:hover {
-        background-color: rgba(255, 193, 7, 0.1);
-        color: #e0a800;
-    }
-
-    /* Updated Links Grid for 6+ items per row */
-    .links-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 12px;
-        padding-bottom: 5px;
-    }
-
-    .link-button {
-        display: flex;
-        flex-direction: column;
-        background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        transition: var(--transition);
-        box-shadow: var(--shadow-light);
-        border: 1px solid #e2e8f0;
-        min-height: 80px;
-        height: auto;
-        text-decoration: none;
-        color: inherit;
-        position: relative;
-        transform: translateY(0);
-        cursor: pointer;
-    }
-
-    .link-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
-        border-color: var(--primary-color);
-        background-color: var(--primary-color);
-        color: white;
-        z-index: 2;
-    }
-
-    .link-button:hover .link-title,
-    .link-button:hover .link-description,
-    .link-button:hover .status-badge {
-        color: white !important;
-    }
-
-    .link-button:hover .status-badge {
-        background: transparent !important;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-    }
-
-    .link-button:hover::before {
-        background: var(--primary-color);
-    }
-
-    .link-button:active {
-        transform: translateY(-1px);
-    }
-
-    .link-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-    }
-
-    .link-button.static::before {
-        background: linear-gradient(90deg, var(--info-color), #4cc9f0);
-    }
-
-    .link-button.urgent::before {
-        background: linear-gradient(90deg, var(--danger-color), #f72585);
-    }
-
-    .link-button.unknown::before {
-        background: linear-gradient(90deg, var(--secondary-color), #9d4edd);
-    }
-
-    .link-content {
-        padding: 10px 8px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        min-height: 0;
-        position: relative;
-        text-decoration: none;
-        gap: 6px;
-    }
-
-    .link-title {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #212529;
-        line-height: 1.3;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin: 0;
-        padding: 0 2px;
-        width: 100%;
-        word-break: break-word;
-        hyphens: auto;
-    }
-
-    .link-description {
-        font-size: 0.7rem;
-        color: #6c757d;
-        line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin: 0;
-        width: 100%;
-    }
-
-    .link-description:empty {
-        display: none;
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 12px;
-        font-size: 0.65rem;
-        font-weight: 600;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-top: auto;
-        align-self: stretch;
-        transition: var(--transition);
-        border: 1px solid transparent;
-    }
-
-    .link-button:hover .badge-static {
-        background: rgba(6, 214, 160, 0.25);
-    }
-
-    .link-button:hover .badge-urgent {
-        background: rgba(239, 71, 111, 0.25);
-    }
-
-    .link-button:hover .badge-unknown {
-        background: rgba(108, 117, 125, 0.25);
-    }
-
-    .empty-state {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 40px 0;
-        text-align: center;
-        color: #6c757d;
-    }
-
-    .empty-icon {
-        font-size: 48px;
-        color: #a0aec0;
-        margin-bottom: 20px;
-    }
-
-    /* Modal styles remain unchanged */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transition: var(--transition);
-    }
-
-    .modal-overlay.active {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .modal-content {
-        background: white;
-        width: 90%;
-        max-width: 500px;
-        padding: 30px;
-        border-radius: 16px;
-        box-shadow: var(--shadow-medium);
-        transform: translateY(20px);
-        transition: transform 0.3s ease;
-    }
-
-    .modal-overlay.active .modal-content {
-        transform: translateY(0);
-    }
-
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .modal-title {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #212529;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .modal-title i {
-        background: var(--primary-color);
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-    }
-
-    .close-modal {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: #6c757d;
-        transition: var(--transition);
-    }
-
-    .close-modal:hover {
-        color: var(--danger-color);
-        transform: rotate(90deg);
-    }
-
-    .success-message {
-        display: none;
-        background: rgba(6, 214, 160, 0.15);
-        color: var(--success-color);
-        padding: 15px;
-        border-radius: 10px;
-        text-align: center;
-        margin-top: 20px;
-        font-weight: 500;
-    }
-
-    .delete-btn {
-        position: absolute;
-        top: 6px;
-        right: 6px;
-        background: rgba(255, 255, 255, 0.8);
-        border: none;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: var(--transition);
-        opacity: 0;
-        z-index: 3;
-        font-size: 0.7rem;
-    }
-
-    .link-button:hover .delete-btn {
-        opacity: 1;
-    }
-
-    .delete-btn:hover {
-        background: var(--danger-color);
-        color: white;
-        transform: scale(1.1);
-    }
-
-    .confirmation-modal .modal-content {
-        max-width: 400px;
-    }
-
-    .confirmation-buttons {
-        display: flex;
-        gap: 15px;
-        margin-top: 25px;
-    }
-
-    .confirm-btn, .cancel-btn {
-        flex: 1;
-        padding: 12px;
-        border-radius: 10px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: var(--transition);
-        border: none;
-    }
-
-    .confirm-btn {
-        background: var(--danger-color);
-        color: white;
-    }
-
-    .confirm-btn:hover {
-        background: #d32f2f;
-        transform: translateY(-2px);
-    }
-
-    .cancel-btn {
-        background: #f0f0f0;
-        color: #333;
-    }
-
-    .cancel-btn:hover {
-        background: #e0e0e0;
-        transform: translateY(-2px);
-    }
-
-    /* Search results styling */
-    .search-results {
-        max-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        margin-top: 10px;
-        display: none;
-    }
-
-    .search-result-item {
-        padding: 10px 15px;
-        border-bottom: 1px solid #dee2e6;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .search-result-item:hover {
-        background-color: #f8f9fa;
-    }
-
-    .search-result-item:last-child {
-        border-bottom: none;
-    }
-
-    .search-result-title {
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-bottom: 4px;
-    }
-
-    .search-result-url {
-        font-size: 0.8rem;
-        color: #6c757d;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* Responsive adjustments */
-    @media (min-width: 1200px) {
-        .links-grid {
-            grid-template-columns: repeat(6, 1fr);
-        }
-    }
-
-    @media (max-width: 1199px) {
-        .links-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        }
-    }
-
-    @media (max-width: 992px) {
-        .dashboard-content {
-            flex-direction: column;
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #6c757d;
+            --success-color: #06d6a0;
+            --danger-color: #ef476f;
+            --warning-color: #ffd166;
+            --info-color: #118ab2;
+            --dark-bg: #1a202c;
+            --darker-bg: #131720;
+            --card-bg: #2d3748;
+            --card-border: #3d4758;
+            --text-light: #e2e8f0;
+            --text-muted: #a0aec0;
+            --light-bg: #f8f9fa;
+            --light-border: #4a5568;
+            --white: #ffffff;
+            --orange-bg: #FFE0B2;
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.15);
+            --shadow-medium: 0 5px 15px rgba(0,0,0,0.2);
+            --transition: all 0.3s ease;
         }
 
-        .links-display-section {
-            min-height: 500px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .dashboard-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 20px;
-            padding: 1.5rem;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .header-left {
-            flex-direction: column;
-            align-items: flex-start;
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
         }
 
-        .section-title {
-            font-size: 1.2rem;
-        }
-
+        /* Navigation container */
         .nav-container {
+            background: #f8f9fa;
             padding: 8px 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+            overflow-x: auto;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .home-icon-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .home-icon {
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid #dee2e6;
+        }
+
+        .home-icon:hover {
+            background-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .home-icon:hover img {
+            filter: invert(1);
+        }
+
+        .home-icon:active {
+            transform: scale(0.95);
+        }
+
+        .home-icon img {
+            width: 22px;
+            height: 22px;
+            transition: var(--transition);
+            display: block;
+        }
+
+        /* Section navigation */
+        .section-navigation {
+            display: inline-flex;
+            gap: 8px;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            flex-wrap: nowrap;
+            border: none;
+            min-width: 0;
+            flex: 1;
         }
 
         .section-navigation .nav-button {
-            padding: 8px 12px;
-            font-size: 0.7rem;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
         }
 
-        .links-grid {
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
+        .section-navigation .nav-button:hover {
+            background-color: var(--primary-color);
+            color: var(--white);
         }
 
-        .link-button {
-            min-height: 70px;
+        .section-navigation .nav-button.active {
+            background-color: var(--primary-color) !important;
+            color: var(--white) !important;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
         }
 
-        .link-title {
-            font-size: 0.7rem;
+        /* Main dashboard layout */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
 
-        .link-description {
-            font-size: 0.65rem;
+        .dashboard-content {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            padding: 15px 25px 25px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            height: calc(100vh - 60px);
+            overflow: hidden;
         }
-    }
 
-    @media (max-width: 576px) {
-        .dashboard-header h1 {
-            font-size: 1.4rem;
+        .links-display-section {
+            flex: 1;
+            background-color: white;
+            padding: 5px 10px 10px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+            border: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .scrollable-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            color: #212529;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+            flex-shrink: 0;
         }
 
-        .link-content {
-            padding: 8px 6px;
+        .card-title i {
+            background: var(--primary-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
         }
 
-        .modal-content {
-            padding: 20px;
+        /* Header container for buttons */
+        .header-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
-        .nav-container {
-            padding: 8px 0.8rem;
+        .action-title {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #495057;
+            white-space: nowrap;
         }
 
         .action-link {
-            padding: 0.3rem 0.6rem;
-            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            color: #0d6efd;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
         }
 
-        .header-container {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
+        .action-link:hover {
+            background-color: #e9ecef;
+            text-decoration: none;
+            color: #0a58ca;
         }
 
+        .action-link i {
+            margin-right: 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        /* Edit link button specific styling */
+        .action-link.edit-link {
+            color: #ffc107;
+        }
+
+        .action-link.edit-link:hover {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #e0a800;
+        }
+
+        /* Links Grid */
         .links-grid {
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            padding-bottom: 5px;
         }
-    }
-</style>
+
+        .link-card {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+            border: 1px solid #e2e8f0;
+            min-height: 80px;
+            height: auto;
+            position: relative;
+            transform: translateY(0);
+        }
+
+        .link-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+            color: white;
+            z-index: 2;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .link-card.static::before {
+            background: linear-gradient(90deg, var(--info-color), #4cc9f0);
+        }
+
+        .link-card.urgent::before {
+            background: linear-gradient(90deg, var(--danger-color), #f72585);
+        }
+
+        .link-card.unknown::before {
+            background: linear-gradient(90deg, var(--secondary-color), #9d4edd);
+        }
+
+        .link-content {
+            padding: 10px 8px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 0;
+            position: relative;
+            text-decoration: none;
+            gap: 6px;
+            color: inherit;
+        }
+
+        .link-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #212529;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+            padding: 0 2px;
+            width: 100%;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        .link-card:hover .link-title {
+            color: var(--white);
+        }
+
+        .link-description {
+            font-size: 0.7rem;
+            color: #6c757d;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+            width: 100%;
+        }
+
+        .link-card:hover .link-description {
+            color: var(--white);
+        }
+
+        .link-description:empty {
+            display: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: auto;
+            align-self: stretch;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .link-card:hover .badge-static {
+            background: rgba(6, 214, 160, 0.25);
+            color: var(--white);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .link-card:hover .badge-urgent {
+            background: rgba(239, 71, 111, 0.25);
+            color: var(--white);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .link-card:hover .badge-unknown {
+            background: rgba(108, 117, 125, 0.25);
+            color: var(--white);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Delete Button */
+        .delete-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            opacity: 0;
+            z-index: 3;
+            font-size: 0.7rem;
+            color: var(--danger-color);
+        }
+
+        .link-card:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 0;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            color: #a0aec0;
+            margin-bottom: 20px;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-medium);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #212529;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-title i {
+            background: var(--primary-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--danger-color);
+            transform: rotate(90deg);
+        }
+
+        .success-message {
+            display: none;
+            background: rgba(6, 214, 160, 0.15);
+            color: var(--success-color);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        /* Confirmation Modal */
+        .confirmation-modal .modal-content {
+            max-width: 400px;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .confirm-btn, .cancel-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .confirm-btn {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .confirm-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        .cancel-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .cancel-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 1200px) {
+            .links-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (max-width: 1199px) {
+            .links-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-content {
+                flex-direction: column;
+            }
+
+            .links-display-section {
+                min-height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .links-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            .link-card {
+                min-height: 70px;
+            }
+
+            .link-title {
+                font-size: 0.7rem;
+            }
+
+            .link-description {
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .links-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Navigation container -->
         <div class="nav-container">
             <div class="home-icon-container">
-                <a href="http://127.0.0.1:5000/dashboard" class="home-icon" title="Back to Main Dashboard">
+                <a href="{{ url_for('main.dashboard') }}" class="home-icon" title="Back to Main Dashboard">
                     <img src="{{ url_for('static', filename='images/home_icon.png') }}" alt="Home Icon">
                 </a>
             </div>
@@ -798,10 +697,12 @@
                     {% if data %}
                         <div class="links-grid" id="linksContainer">
                             {% for row in data %}
-                            <div class="link-button {{ row.status }}" data-link-id="{{ row.id }}">
-                                <a href="{{ row.link }}" target="_blank" class="link-content">
+                            <div class="link-card {{ row.status }}" data-link-id="{{ row.id }}">
+                                <a href="{{ row.url }}" target="_blank" class="link-content">
                                     <div class="link-title">{{ row.title }}</div>
-                                    <div class="link-description">{{ row.description or '' }}</div>
+                                    {% if row.description %}
+                                    <div class="link-description">{{ row.description }}</div>
+                                    {% endif %}
                                 </a>
                                 <button class="delete-btn" title="Delete Link" data-link-id="{{ row.id }}">
                                     <i class="bi bi-trash"></i>
@@ -873,7 +774,7 @@
                 <button class="close-modal" id="closeEditModal">&times;</button>
             </div>
             <form id="editLinkForm">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <!-- Search section -->
                 <div class="form-group">
                     <label class="form-label" for="searchQuery">Search Links</label>
@@ -931,73 +832,181 @@
         </div>
     </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Elements for Add Link modal
-        const addLinkButton = document.getElementById('addLinkButton');
-        const addLinkModal = document.getElementById('addLinkModal');
-        const closeModal = document.getElementById('closeModal');
-        const successMessage = document.getElementById('successMessage');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements for Add Link modal
+            const addLinkButton = document.getElementById('addLinkButton');
+            const addLinkModal = document.getElementById('addLinkModal');
+            const closeModal = document.getElementById('closeModal');
+            const successMessage = document.getElementById('successMessage');
 
-        // Elements for Edit Link modal
-        const editLinkButton = document.getElementById('editLinkButton');
-        const editLinkModal = document.getElementById('editLinkModal');
-        const closeEditModal = document.getElementById('closeEditModal');
-        const searchQuery = document.getElementById('searchQuery');
-        const searchResults = document.getElementById('searchResults');
-        const editFormSection = document.getElementById('editFormSection');
-        const editLinkForm = document.getElementById('editLinkForm');
-        const editSuccessMessage = document.getElementById('editSuccessMessage');
+            // Elements for Edit Link modal
+            const editLinkButton = document.getElementById('editLinkButton');
+            const editLinkModal = document.getElementById('editLinkModal');
+            const closeEditModal = document.getElementById('closeEditModal');
+            const searchQuery = document.getElementById('searchQuery');
+            const searchResults = document.getElementById('searchResults');
+            const editFormSection = document.getElementById('editFormSection');
+            const editLinkForm = document.getElementById('editLinkForm');
+            const editSuccessMessage = document.getElementById('editSuccessMessage');
 
-        // Show Add Link modal
-        addLinkButton.addEventListener('click', function() {
-            addLinkModal.classList.add('active');
-        });
+            // Confirmation modal elements
+            const confirmationModal = document.getElementById('confirmationModal');
+            const cancelDelete = document.getElementById('cancelDelete');
+            const confirmDelete = document.getElementById('confirmDelete');
+            let currentLinkToDelete = null;
 
-        // Hide Add Link modal
-        closeModal.addEventListener('click', function() {
-            addLinkModal.classList.remove('active');
-        });
+            // Show Add Link modal
+            addLinkButton.addEventListener('click', function() {
+                addLinkModal.classList.add('active');
+            });
 
-        // Show Edit Link modal
-        editLinkButton.addEventListener('click', function() {
-            editLinkModal.classList.add('active');
-            // Clear previous search
-            searchQuery.value = '';
-            searchResults.innerHTML = '';
-            searchResults.style.display = 'none';
-            editFormSection.style.display = 'none';
-        });
+            // Hide Add Link modal
+            closeModal.addEventListener('click', function() {
+                addLinkModal.classList.remove('active');
+            });
 
-        // Hide Edit Link modal
-        closeEditModal.addEventListener('click', function() {
-            editLinkModal.classList.remove('active');
-        });
+            // Show Edit Link modal
+            editLinkButton.addEventListener('click', function() {
+                editLinkModal.classList.add('active');
+                // Clear previous search
+                searchQuery.value = '';
+                searchResults.innerHTML = '';
+                searchResults.style.display = 'none';
+                editFormSection.style.display = 'none';
+            });
 
-        // Close modals when clicking outside
-        [addLinkModal, editLinkModal].forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
+            // Hide Edit Link modal
+            closeEditModal.addEventListener('click', function() {
+                editLinkModal.classList.remove('active');
+            });
+
+            // Close modals when clicking outside
+            [addLinkModal, editLinkModal, confirmationModal].forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.remove('active');
+                        if (modal === confirmationModal) {
+                            currentLinkToDelete = null;
+                        }
+                    }
+                });
+            });
+
+            // Add new link form submission
+            const addLinkForm = document.getElementById('addLinkForm');
+            if (addLinkForm) {
+                addLinkForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const formData = {
+                        section_id: this.section_id.value,
+                        title: this.title.value,
+                        url: this.url.value,
+                        status: this.status.value,
+                        csrf_token: '{{ csrf_token() }}'
+                    };
+
+                    try {
+                        const response = await fetch('{{ url_for("main.add_link") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify(formData)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.status === 'success') {
+                            addLinkForm.style.display = 'none';
+                            successMessage.style.display = 'block';
+                            showToast('Link added successfully!', 'success');
+
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast('Error: ' + result.message, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showToast('An error occurred. Please try again.', 'error');
+                    }
+                });
+            }
+
+            // Search links for editing
+            searchQuery.addEventListener('input', async function() {
+                const query = this.value.trim();
+
+                if (query.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/search_links?query=${encodeURIComponent(query)}&section_id={{ current_section.id }}`);
+                    const results = await response.json();
+
+                    if (results.length > 0) {
+                        searchResults.innerHTML = '';
+                        results.forEach(link => {
+                            const resultItem = document.createElement('div');
+                            resultItem.className = 'search-result-item';
+                            resultItem.dataset.id = link.id;
+                            resultItem.dataset.title = link.title;
+                            resultItem.dataset.url = link.url;
+                            resultItem.dataset.status = link.status;
+
+                            resultItem.innerHTML = `
+                                <div class="search-result-title">${link.title}</div>
+                                <div class="search-result-url">${link.url}</div>
+                            `;
+
+                            resultItem.addEventListener('click', function() {
+                                // Populate edit form
+                                document.getElementById('editLinkId').value = link.id;
+                                document.getElementById('editTitle').value = link.title;
+                                document.getElementById('editUrl').value = link.url;
+                                document.getElementById('editStatus').value = link.status;
+
+                                // Show edit form
+                                editFormSection.style.display = 'block';
+
+                                // Clear search results
+                                searchQuery.value = '';
+                                searchResults.style.display = 'none';
+                            });
+
+                            searchResults.appendChild(resultItem);
+                        });
+                        searchResults.style.display = 'block';
+                    } else {
+                        searchResults.innerHTML = '<div class="search-result-item">No matching links found</div>';
+                        searchResults.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                    showToast('Failed to search links. Please try again.', 'error');
                 }
             });
-        });
 
-        // Add new link form submission
-        const addLinkForm = document.getElementById('addLinkForm');
-        if (addLinkForm) {
-            addLinkForm.addEventListener('submit', async function(e) {
+            // Edit link form submission
+            editLinkForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
                 const formData = {
-                    section_id: this.section_id.value,
+                    id: this.link_id.value,
                     title: this.title.value,
                     url: this.url.value,
-                    status: this.status.value
+                    status: this.status.value,
+                    csrf_token: this.csrf_token.value
                 };
 
                 try {
-                    const response = await fetch('{{ url_for("main.add_link") }}', {
+                    const response = await fetch('{{ url_for("main.update_link") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1009,9 +1018,8 @@
                     const result = await response.json();
 
                     if (result.status === 'success') {
-                        addLinkForm.style.display = 'none';
-                        successMessage.style.display = 'block';
-                        showToast('Link added successfully!', 'success');
+                        editSuccessMessage.style.display = 'block';
+                        showToast('Link updated successfully!', 'success');
 
                         setTimeout(() => {
                             window.location.reload();
@@ -1024,253 +1032,159 @@
                     showToast('An error occurred. Please try again.', 'error');
                 }
             });
-        }
 
-        // Search links for editing
-        searchQuery.addEventListener('input', async function() {
-            const query = this.value.trim();
-
-            if (query.length < 2) {
-                searchResults.style.display = 'none';
-                return;
-            }
-
-            try {
-                const response = await fetch(`/search_links?query=${encodeURIComponent(query)}&section_id={{ current_section.id }}`);
-                const results = await response.json();
-
-                if (results.length > 0) {
-                    searchResults.innerHTML = '';
-                    results.forEach(link => {
-                        const resultItem = document.createElement('div');
-                        resultItem.className = 'search-result-item';
-                        resultItem.dataset.id = link.id;
-                        resultItem.dataset.title = link.title;
-                        resultItem.dataset.url = link.url;
-                        resultItem.dataset.status = link.status;
-
-                        resultItem.innerHTML = `
-                            <div class="search-result-title">${link.title}</div>
-                            <div class="search-result-url">${link.url}</div>
-                        `;
-
-                        resultItem.addEventListener('click', function() {
-                            // Populate edit form
-                            document.getElementById('editLinkId').value = link.id;
-                            document.getElementById('editTitle').value = link.title;
-                            document.getElementById('editUrl').value = link.url;
-                            document.getElementById('editStatus').value = link.status;
-
-                            // Show edit form
-                            editFormSection.style.display = 'block';
-
-                            // Clear search results
-                            searchQuery.value = '';
-                            searchResults.style.display = 'none';
-                        });
-
-                        searchResults.appendChild(resultItem);
-                    });
-                    searchResults.style.display = 'block';
-                } else {
-                    searchResults.innerHTML = '<div class="search-result-item">No matching links found</div>';
-                    searchResults.style.display = 'block';
+            // Event delegation for link cards
+            document.addEventListener('click', function(e) {
+                // Handle delete button clicks
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (deleteBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const linkId = deleteBtn.dataset.linkId;
+                    const linkCard = deleteBtn.closest('.link-card');
+                    currentLinkToDelete = { element: linkCard, id: linkId };
+                    confirmationModal.classList.add('active');
+                    return;
                 }
-            } catch (error) {
-                console.error('Search error:', error);
-                showToast('Failed to search links. Please try again.', 'error');
-            }
-        });
 
-        // Edit link form submission
-        editLinkForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = {
-                id: this.link_id.value,
-                title: this.title.value,
-                url: this.url.value,
-                status: this.status.value
-            };
-
-            try {
-                const response = await fetch('{{ url_for("main.update_link") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    editSuccessMessage.style.display = 'block';
-                    showToast('Link updated successfully!', 'success');
-
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showToast('Error: ' + result.message, 'error');
+                // Handle clicks on link content (let it behave normally)
+                if (e.target.closest('.link-content')) {
+                    return;
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('An error occurred. Please try again.', 'error');
-            }
-        });
 
-        // Confirmation modal and other existing JavaScript code
-        const confirmationModal = document.getElementById('confirmationModal');
-        const cancelDelete = document.getElementById('cancelDelete');
-        const confirmDelete = document.getElementById('confirmDelete');
-        let currentLinkToDelete = null;
-
-        // Event delegation for delete buttons
-        document.getElementById('linksContainer')?.addEventListener('click', function(e) {
-            const deleteBtn = e.target.closest('.delete-btn');
-
-            if (deleteBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const linkId = deleteBtn.dataset.linkId;
-                const linkButton = deleteBtn.closest('.link-button');
-
-                currentLinkToDelete = {
-                    element: linkButton,
-                    id: linkId
-                };
-
-                // Show confirmation modal
-                confirmationModal.classList.add('active');
-            }
-        });
-
-        // Confirm deletion
-        confirmDelete.addEventListener('click', async function() {
-            if (!currentLinkToDelete) return;
-
-            const { element, id } = currentLinkToDelete;
-
-            try {
-                const response = await fetch(`/delete_link/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token() }}'
+                // Handle clicks on the link card (but not delete button or content)
+                const linkCard = e.target.closest('.link-card');
+                if (linkCard) {
+                    const link = linkCard.querySelector('.link-content');
+                    if (link) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(link.href, '_blank');
                     }
-                });
+                }
+            });
 
-                const result = await response.json();
+            // Confirm deletion
+            confirmDelete.addEventListener('click', async function() {
+                if (!currentLinkToDelete) return;
 
-                if (result.status === 'success') {
-                    // Visual removal effect
-                    element.style.transition = 'all 0.3s ease';
-                    element.style.transform = 'scale(0.9)';
-                    element.style.opacity = '0.5';
+                const { element, id } = currentLinkToDelete;
 
-                    setTimeout(() => {
-                        element.style.transform = 'scale(0.1)';
-                        element.style.opacity = '0';
+                try {
+                    const response = await fetch(`/delete_link/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token() }}'
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        // Visual removal effect
+                        element.style.transition = 'all 0.3s ease';
+                        element.style.transform = 'scale(0.9)';
+                        element.style.opacity = '0.5';
 
                         setTimeout(() => {
-                            element.remove();
-                            confirmationModal.classList.remove('active');
+                            element.style.transform = 'scale(0.1)';
+                            element.style.opacity = '0';
 
-                            // Handle empty state
-                            if (!document.querySelector('.link-button')) {
-                                const emptyState = document.createElement('div');
-                                emptyState.className = 'empty-state';
-                                emptyState.innerHTML = `
-                                    <div class="empty-icon">
-                                        <i class="bi bi-link-45deg"></i>
-                                    </div>
-                                    <p>No links found in this section. Add some using the New Link button!</p>
-                                `;
-                                document.getElementById('linksContainer').appendChild(emptyState);
-                            }
+                            setTimeout(() => {
+                                element.remove();
+                                confirmationModal.classList.remove('active');
 
-                            showToast('Link deleted successfully!', 'success');
-                        }, 300);
-                    }, 100);
-                } else {
-                    showToast(result.message || 'Failed to delete link', 'error');
+                                // Handle empty state
+                                if (!document.querySelector('.link-card')) {
+                                    const emptyState = document.createElement('div');
+                                    emptyState.className = 'empty-state';
+                                    emptyState.innerHTML = `
+                                        <div class="empty-icon">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </div>
+                                        <p>No links found in this section. Add some using the New Link button!</p>
+                                    `;
+                                    document.getElementById('linksContainer').appendChild(emptyState);
+                                }
+
+                                showToast('Link deleted successfully!', 'success');
+                            }, 300);
+                        }, 100);
+                    } else {
+                        showToast(result.message || 'Failed to delete link', 'error');
+                    }
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    showToast('Failed to delete link. Please try again.', 'error');
+                } finally {
+                    currentLinkToDelete = null;
                 }
-            } catch (error) {
-                console.error('Delete error:', error);
-                showToast('Failed to delete link. Please try again.', 'error');
-            } finally {
-                currentLinkToDelete = null;
-            }
-        });
+            });
 
-        // Close confirmation modal when clicking outside
-        confirmationModal.addEventListener('click', function(e) {
-            if (e.target === confirmationModal) {
+            // Cancel deletion
+            cancelDelete.addEventListener('click', function() {
                 confirmationModal.classList.remove('active');
                 currentLinkToDelete = null;
-            }
-        });
+            });
 
-        // Add animation to buttons on page load
-        const buttons = document.querySelectorAll('.link-button');
-        buttons.forEach((button, index) => {
-            button.style.opacity = '0';
-            button.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                button.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                button.style.opacity = '1';
-                button.style.transform = 'translateY(0)';
-            }, index * 100);
-        });
+            // Add animation to cards on page load
+            const cards = document.querySelectorAll('.link-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
 
-        // Enhanced Toast Notification
-        function showToast(message, type) {
-            // Create toast container if it doesn't exist
-            let toastContainer = document.querySelector('.toast-container');
-            if (!toastContainer) {
-                toastContainer = document.createElement('div');
-                toastContainer.className = 'toast-container position-fixed top-20 end-0 p-3';
-                toastContainer.style.zIndex = '9999';
-                document.body.appendChild(toastContainer);
-            }
+            // Enhanced Toast Notification
+            function showToast(message, type) {
+                // Create toast container if it doesn't exist
+                let toastContainer = document.querySelector('.toast-container');
+                if (!toastContainer) {
+                    toastContainer = document.createElement('div');
+                    toastContainer.className = 'toast-container position-fixed top-20 end-0 p-3';
+                    toastContainer.style.zIndex = '9999';
+                    document.body.appendChild(toastContainer);
+                }
 
-            // Create toast element
-            const toast = document.createElement('div');
-            toast.className = `toast show align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0`;
-            toast.setAttribute('role', 'alert');
-            toast.setAttribute('aria-live', 'assertive');
-            toast.setAttribute('aria-atomic', 'true');
-            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                // Create toast element
+                const toast = document.createElement('div');
+                toast.className = `toast show align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+                toast.setAttribute('role', 'alert');
+                toast.setAttribute('aria-live', 'assertive');
+                toast.setAttribute('aria-atomic', 'true');
+                toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
 
-            // Icon based on type
-            const icon = type === 'success' ?
-                '<i class="bi bi-check-circle-fill me-2"></i>' :
-                '<i class="bi bi-exclamation-circle-fill me-2"></i>';
+                // Icon based on type
+                const icon = type === 'success' ?
+                    '<i class="bi bi-check-circle-fill me-2"></i>' :
+                    '<i class="bi bi-exclamation-circle-fill me-2"></i>';
 
-            toast.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <div class="toast-icon fs-4">${icon}</div>
-                    <div class="toast-body">
-                        ${message}
+                toast.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="toast-icon fs-4">${icon}</div>
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-3" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-3" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            `;
+                `;
 
-            toastContainer.appendChild(toast);
+                toastContainer.appendChild(toast);
 
-            // Auto remove toast after 3 seconds
-            setTimeout(() => {
-                toast.style.transition = 'opacity 0.5s';
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 3000);
-        }
-    });
-</script>
-
+                // Auto remove toast after 3 seconds
+                setTimeout(() => {
+                    toast.style.transition = 'opacity 0.5s';
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 500);
+                }, 3000);
+            }
+        });
+    </script>
 </body>
+</html>
 {% endblock %}
