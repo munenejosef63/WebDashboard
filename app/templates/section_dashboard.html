@@ -480,6 +480,11 @@
             color: white;
         }
 
+        /* New style for pinned button text color */
+        .pin-btn i {
+            color: inherit;
+        }
+
         .empty-state {
             flex-grow: 1;
             display: flex;
@@ -724,9 +729,9 @@
                     {% if data %}
                         <div class="links-grid" id="linksContainer">
                             {% for row in data %}
-                            <div class="link-card {{ row.status }}" data-link-id="{{ row.id }}">
-                                <button class="action-btn pin-btn" title="Pin to Top" data-link-id="{{ row.id }}">
-                                    <i class="bi bi-pin-angle"></i>
+                            <div class="link-card {{ row.status }} {% if row.pinned %}pinned{% endif %}" data-link-id="{{ row.id }}">
+                                <button class="action-btn pin-btn {% if row.pinned %}pinned{% endif %}" title="{% if row.pinned %}Unpin{% else %}Pin to Top{% endif %}" data-link-id="{{ row.id }}">
+                                    <i class="bi {% if row.pinned %}bi-pin-fill{% else %}bi-pin-angle{% endif %}"></i>
                                 </button>
                                 <a href="{{ row.url }}" target="_blank" class="link-content">
                                     <div class="link-title">{{ row.title }}</div>
@@ -863,180 +868,82 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elements for Add Link modal
-            const addLinkButton = document.getElementById('addLinkButton');
-            const addLinkModal = document.getElementById('addLinkModal');
-            const closeModal = document.getElementById('closeModal');
-            const successMessage = document.getElementById('successMessage');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements for Add Link modal
+        const addLinkButton = document.getElementById('addLinkButton');
+        const addLinkModal = document.getElementById('addLinkModal');
+        const closeModal = document.getElementById('closeModal');
+        const successMessage = document.getElementById('successMessage');
 
-            // Elements for Edit Link modal
-            const editLinkButton = document.getElementById('editLinkButton');
-            const editLinkModal = document.getElementById('editLinkModal');
-            const closeEditModal = document.getElementById('closeEditModal');
-            const searchQuery = document.getElementById('searchQuery');
-            const searchResults = document.getElementById('searchResults');
-            const editFormSection = document.getElementById('editFormSection');
-            const editLinkForm = document.getElementById('editLinkForm');
-            const editSuccessMessage = document.getElementById('editSuccessMessage');
+        // Elements for Edit Link modal
+        const editLinkButton = document.getElementById('editLinkButton');
+        const editLinkModal = document.getElementById('editLinkModal');
+        const closeEditModal = document.getElementById('closeEditModal');
+        const searchQuery = document.getElementById('searchQuery');
+        const searchResults = document.getElementById('searchResults');
+        const editFormSection = document.getElementById('editFormSection');
+        const editLinkForm = document.getElementById('editLinkForm');
+        const editSuccessMessage = document.getElementById('editSuccessMessage');
 
-            // Confirmation modal elements
-            const confirmationModal = document.getElementById('confirmationModal');
-            const cancelDelete = document.getElementById('cancelDelete');
-            const confirmDelete = document.getElementById('confirmDelete');
-            let currentLinkToDelete = null;
+        // Confirmation modal elements
+        const confirmationModal = document.getElementById('confirmationModal');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+        let currentLinkToDelete = null;
 
-            // Show Add Link modal
-            addLinkButton.addEventListener('click', function() {
-                addLinkModal.classList.add('active');
-            });
+        // Show Add Link modal
+        addLinkButton.addEventListener('click', function() {
+            addLinkModal.classList.add('active');
+        });
 
-            // Hide Add Link modal
-            closeModal.addEventListener('click', function() {
-                addLinkModal.classList.remove('active');
-            });
+        // Hide Add Link modal
+        closeModal.addEventListener('click', function() {
+            addLinkModal.classList.remove('active');
+        });
 
-            // Show Edit Link modal
-            editLinkButton.addEventListener('click', function() {
-                editLinkModal.classList.add('active');
-                // Clear previous search
-                searchQuery.value = '';
-                searchResults.innerHTML = '';
-                searchResults.style.display = 'none';
-                editFormSection.style.display = 'none';
-            });
+        // Show Edit Link modal
+        editLinkButton.addEventListener('click', function() {
+            editLinkModal.classList.add('active');
+            // Clear previous search
+            searchQuery.value = '';
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+            editFormSection.style.display = 'none';
+        });
 
-            // Hide Edit Link modal
-            closeEditModal.addEventListener('click', function() {
-                editLinkModal.classList.remove('active');
-            });
+        // Hide Edit Link modal
+        closeEditModal.addEventListener('click', function() {
+            editLinkModal.classList.remove('active');
+        });
 
-            // Close modals when clicking outside
-            [addLinkModal, editLinkModal, confirmationModal].forEach(modal => {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        modal.classList.remove('active');
-                        if (modal === confirmationModal) {
-                            currentLinkToDelete = null;
-                        }
+        // Close modals when clicking outside
+        [addLinkModal, editLinkModal, confirmationModal].forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    if (modal === confirmationModal) {
+                        currentLinkToDelete = null;
                     }
-                });
-            });
-
-            // Add new link form submission
-            const addLinkForm = document.getElementById('addLinkForm');
-            if (addLinkForm) {
-                addLinkForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-
-                    const formData = {
-                        section_id: this.section_id.value,
-                        title: this.title.value,
-                        url: this.url.value,
-                        status: this.status.value,
-                        csrf_token: '{{ csrf_token() }}'
-                    };
-
-                    try {
-                        const response = await fetch('{{ url_for("main.add_link") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify(formData)
-                        });
-
-                        const result = await response.json();
-
-                        if (result.status === 'success') {
-                            addLinkForm.style.display = 'none';
-                            successMessage.style.display = 'block';
-                            showToast('Link added successfully!', 'success');
-
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-                        } else {
-                            showToast('Error: ' + result.message, 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showToast('An error occurred. Please try again.', 'error');
-                    }
-                });
-            }
-
-            // Search links for editing
-            searchQuery.addEventListener('input', async function() {
-                const query = this.value.trim();
-
-                if (query.length < 2) {
-                    searchResults.style.display = 'none';
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`/search_links?query=${encodeURIComponent(query)}&section_id={{ current_section.id }}`);
-                    const results = await response.json();
-
-                    if (results.length > 0) {
-                        searchResults.innerHTML = '';
-                        results.forEach(link => {
-                            const resultItem = document.createElement('div');
-                            resultItem.className = 'search-result-item';
-                            resultItem.dataset.id = link.id;
-                            resultItem.dataset.title = link.title;
-                            resultItem.dataset.url = link.url;
-                            resultItem.dataset.status = link.status;
-
-                            resultItem.innerHTML = `
-                                <div class="search-result-title">${link.title}</div>
-                                <div class="search-result-url">${link.url}</div>
-                            `;
-
-                            resultItem.addEventListener('click', function() {
-                                // Populate edit form
-                                document.getElementById('editLinkId').value = link.id;
-                                document.getElementById('editTitle').value = link.title;
-                                document.getElementById('editUrl').value = link.url;
-                                document.getElementById('editStatus').value = link.status;
-
-                                // Show edit form
-                                editFormSection.style.display = 'block';
-
-                                // Clear search results
-                                searchQuery.value = '';
-                                searchResults.style.display = 'none';
-                            });
-
-                            searchResults.appendChild(resultItem);
-                        });
-                        searchResults.style.display = 'block';
-                    } else {
-                        searchResults.innerHTML = '<div class="search-result-item">No matching links found</div>';
-                        searchResults.style.display = 'block';
-                    }
-                } catch (error) {
-                    console.error('Search error:', error);
-                    showToast('Failed to search links. Please try again.', 'error');
                 }
             });
+        });
 
-            // Edit link form submission
-            editLinkForm.addEventListener('submit', async function(e) {
+        // Add new link form submission
+        const addLinkForm = document.getElementById('addLinkForm');
+        if (addLinkForm) {
+            addLinkForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
                 const formData = {
-                    id: this.link_id.value,
+                    section_id: this.section_id.value,
                     title: this.title.value,
                     url: this.url.value,
                     status: this.status.value,
-                    csrf_token: this.csrf_token.value
+                    csrf_token: '{{ csrf_token() }}'
                 };
 
                 try {
-                    const response = await fetch('{{ url_for("main.update_link") }}', {
+                    const response = await fetch('{{ url_for("main.add_link") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1048,8 +955,9 @@
                     const result = await response.json();
 
                     if (result.status === 'success') {
-                        editSuccessMessage.style.display = 'block';
-                        showToast('Link updated successfully!', 'success');
+                        addLinkForm.style.display = 'none';
+                        successMessage.style.display = 'block';
+                        showToast('Link added successfully!', 'success');
 
                         setTimeout(() => {
                             window.location.reload();
@@ -1062,183 +970,285 @@
                     showToast('An error occurred. Please try again.', 'error');
                 }
             });
+        }
 
-            // Event delegation for link cards
-            document.addEventListener('click', function(e) {
-                // Handle delete button clicks
-                const deleteBtn = e.target.closest('.delete-btn');
-                if (deleteBtn) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const linkId = deleteBtn.dataset.linkId;
-                    const linkCard = deleteBtn.closest('.link-card');
-                    currentLinkToDelete = { element: linkCard, id: linkId };
-                    confirmationModal.classList.add('active');
-                    return;
-                }
+        // Search links for editing
+        searchQuery.addEventListener('input', async function() {
+            const query = this.value.trim();
 
-                // Handle pin button clicks
-                const pinBtn = e.target.closest('.pin-btn');
-                if (pinBtn) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const linkCard = pinBtn.closest('.link-card');
-                    linkCard.classList.toggle('pinned');
-                    pinBtn.classList.toggle('pinned');
-
-                    // Move pinned cards to the top
-                    const container = document.getElementById('linksContainer');
-                    const pinnedCards = Array.from(container.querySelectorAll('.pinned'));
-                    const unpinnedCards = Array.from(container.querySelectorAll('.link-card:not(.pinned)'));
-
-                    // Clear container
-                    container.innerHTML = '';
-
-                    // Add pinned cards first
-                    pinnedCards.forEach(card => {
-                        container.appendChild(card);
-                    });
-
-                    // Add unpinned cards
-                    unpinnedCards.forEach(card => {
-                        container.appendChild(card);
-                    });
-                    return;
-                }
-
-                // Handle clicks on link content (let it behave normally)
-                if (e.target.closest('.link-content')) {
-                    return;
-                }
-
-                // Handle clicks on the link card (but not action buttons or content)
-                const linkCard = e.target.closest('.link-card');
-                if (linkCard) {
-                    const link = linkCard.querySelector('.link-content');
-                    if (link) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.open(link.href, '_blank');
-                    }
-                }
-            });
-
-            // Confirm deletion
-            confirmDelete.addEventListener('click', async function() {
-                if (!currentLinkToDelete) return;
-
-                const { element, id } = currentLinkToDelete;
-
-                try {
-                    const response = await fetch(`/delete_link/${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token() }}'
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    if (result.status === 'success') {
-                        // Visual removal effect
-                        element.style.transition = 'all 0.3s ease';
-                        element.style.transform = 'scale(0.9)';
-                        element.style.opacity = '0.5';
-
-                        setTimeout(() => {
-                            element.style.transform = 'scale(0.1)';
-                            element.style.opacity = '0';
-
-                            setTimeout(() => {
-                                element.remove();
-                                confirmationModal.classList.remove('active');
-
-                                // Handle empty state
-                                if (!document.querySelector('.link-card')) {
-                                    const emptyState = document.createElement('div');
-                                    emptyState.className = 'empty-state';
-                                    emptyState.innerHTML = `
-                                        <div class="empty-icon">
-                                            <i class="bi bi-link-45deg"></i>
-                                        </div>
-                                                                                <p>No links found in this section. Add some using the New Link button!</p>
-                                    `;
-                                    document.querySelector('.scrollable-content').appendChild(emptyState);
-                                }
-                            }, 300);
-                        }, 100);
-
-                        showToast('Link deleted successfully!', 'success');
-                    } else {
-                        showToast('Error: ' + result.message, 'error');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showToast('An error occurred. Please try again.', 'error');
-                } finally {
-                    currentLinkToDelete = null;
-                }
-            });
-
-            // Cancel deletion
-            cancelDelete.addEventListener('click', function() {
-                confirmationModal.classList.remove('active');
-                currentLinkToDelete = null;
-            });
-
-            // Toast notification function
-            function showToast(message, type) {
-                const toast = document.createElement('div');
-                toast.className = `toast-notification ${type}`;
-                toast.textContent = message;
-                document.body.appendChild(toast);
-
-                setTimeout(() => {
-                    toast.classList.add('show');
-                }, 10);
-
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => {
-                        toast.remove();
-                    }, 300);
-                }, 3000);
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
             }
 
-            // Add toast styles if they don't exist
-            if (!document.querySelector('style#toast-styles')) {
-                const toastStyles = document.createElement('style');
-                toastStyles.id = 'toast-styles';
-                toastStyles.textContent = `
-                    .toast-notification {
-                        position: fixed;
-                        bottom: 20px;
-                        right: 20px;
-                        padding: 12px 24px;
-                        border-radius: 8px;
-                        color: white;
-                        font-weight: 500;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                        transform: translateY(100px);
-                        opacity: 0;
-                        transition: all 0.3s ease;
-                        z-index: 10000;
-                    }
-                    .toast-notification.show {
-                        transform: translateY(0);
-                        opacity: 1;
-                    }
-                    .toast-notification.success {
-                        background-color: var(--success-color);
-                    }
-                    .toast-notification.error {
-                        background-color: var(--danger-color);
-                    }
-                `;
-                document.head.appendChild(toastStyles);
+            try {
+                const response = await fetch(`/search_links?query=${encodeURIComponent(query)}&section_id={{ current_section.id }}`);
+                const results = await response.json();
+
+                if (results.length > 0) {
+                    searchResults.innerHTML = '';
+                    results.forEach(link => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'search-result-item';
+                        resultItem.dataset.id = link.id;
+                        resultItem.dataset.title = link.title;
+                        resultItem.dataset.url = link.url;
+                        resultItem.dataset.status = link.status;
+                        resultItem.dataset.pinned = link.pinned || false;
+
+                        resultItem.innerHTML = `
+                            <div class="search-result-title">${link.title}</div>
+                            <div class="search-result-url">${link.url}</div>
+                            ${link.pinned ? '<div class="search-result-pinned"><i class="bi bi-pin-fill"></i> Pinned</div>' : ''}
+                        `;
+
+                        resultItem.addEventListener('click', function() {
+                            // Populate edit form
+                            document.getElementById('editLinkId').value = link.id;
+                            document.getElementById('editTitle').value = link.title;
+                            document.getElementById('editUrl').value = link.url;
+                            document.getElementById('editStatus').value = link.status;
+
+                            // Show edit form
+                            editFormSection.style.display = 'block';
+
+                            // Clear search results
+                            searchQuery.value = '';
+                            searchResults.style.display = 'none';
+                        });
+
+                        searchResults.appendChild(resultItem);
+                    });
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No matching links found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                showToast('Failed to search links. Please try again.', 'error');
             }
         });
+
+        // Edit link form submission
+        editLinkForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                id: this.link_id.value,
+                title: this.title.value,
+                url: this.url.value,
+                status: this.status.value,
+                csrf_token: this.csrf_token.value
+            };
+
+            try {
+                const response = await fetch('{{ url_for("main.update_link") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    editSuccessMessage.style.display = 'block';
+                    showToast('Link updated successfully!', 'success');
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        // Function to toggle pin status
+        async function togglePinStatus(linkId, newPinState, linkCard, pinBtn) {
+            try {
+                const response = await fetch(`/toggle_pin/${linkId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        pinned: newPinState,
+                        csrf_token: '{{ csrf_token() }}'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Update UI based on new pin state
+                    linkCard.classList.toggle('pinned', newPinState);
+                    pinBtn.classList.toggle('pinned', newPinState);
+
+                    // Update pin button icon and title
+                    const pinIcon = pinBtn.querySelector('i');
+                    if (newPinState) {
+                        pinBtn.title = "Unpin";
+                        pinIcon.classList.remove('bi-pin-angle');
+                        pinIcon.classList.add('bi-pin-fill');
+                    } else {
+                        pinBtn.title = "Pin to Top";
+                        pinIcon.classList.remove('bi-pin-fill');
+                        pinIcon.classList.add('bi-pin-angle');
+                    }
+
+                    // Reorder cards - pinned first
+                    const container = document.getElementById('linksContainer');
+                    if (container) {
+                        const cards = Array.from(container.querySelectorAll('.link-card'));
+
+                        // Sort cards - pinned first, maintaining original order within pinned/unpinned groups
+                        cards.sort((a, b) => {
+                            const aPinned = a.classList.contains('pinned');
+                            const bPinned = b.classList.contains('pinned');
+
+                            if (aPinned && !bPinned) return -1;
+                            if (!aPinned && bPinned) return 1;
+                            return 0; // maintain original order for equal pinned status
+                        });
+
+                        // Re-append sorted cards
+                        cards.forEach(card => container.appendChild(card));
+                    }
+                } else {
+                    showToast('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error toggling pin:', error);
+                showToast('Failed to update pin status', 'error');
+            }
+        }
+
+        // Event delegation for link cards
+        document.addEventListener('click', function(e) {
+            // Handle delete button clicks
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const linkId = deleteBtn.dataset.linkId;
+                const linkCard = deleteBtn.closest('.link-card');
+                                currentLinkToDelete = linkId;
+                confirmationModal.classList.add('active');
+            }
+
+            // Handle pin button clicks
+            const pinBtn = e.target.closest('.pin-btn');
+            if (pinBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const linkId = pinBtn.dataset.linkId;
+                const linkCard = pinBtn.closest('.link-card');
+                const currentPinState = linkCard.classList.contains('pinned');
+                togglePinStatus(linkId, !currentPinState, linkCard, pinBtn);
+            }
+        });
+
+        // Confirm delete button
+        confirmDelete.addEventListener('click', async function() {
+            if (!currentLinkToDelete) return;
+
+            try {
+                const response = await fetch(`/delete_link/${currentLinkToDelete}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        csrf_token: '{{ csrf_token() }}'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showToast('Link deleted successfully!', 'success');
+                    document.querySelector(`.link-card[data-link-id="${currentLinkToDelete}"]`).remove();
+
+                    // Check if we have any links left
+                    if (document.querySelectorAll('.link-card').length === 0) {
+                        window.location.reload();
+                    }
+                } else {
+                    showToast('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting link:', error);
+                showToast('Failed to delete link', 'error');
+            } finally {
+                confirmationModal.classList.remove('active');
+                currentLinkToDelete = null;
+            }
+        });
+
+        // Cancel delete button
+        cancelDelete.addEventListener('click', function() {
+            confirmationModal.classList.remove('active');
+            currentLinkToDelete = null;
+        });
+
+        // Toast notification function
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Add some CSS for the toast notifications
+        const toastStyle = document.createElement('style');
+        toastStyle.textContent = `
+            .toast-notification {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 24px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                transform: translateY(100px);
+                opacity: 0;
+                transition: all 0.3s ease;
+                z-index: 10000;
+            }
+            .toast-notification.show {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            .toast-notification.success {
+                background: var(--success-color);
+            }
+            .toast-notification.error {
+                background: var(--danger-color);
+            }
+        `;
+        document.head.appendChild(toastStyle);
+    });
     </script>
 </body>
 </html>

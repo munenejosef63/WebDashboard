@@ -3,6 +3,7 @@ from app.extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import func, not_
+from sqlalchemy import Boolean
 
 
 class User(db.Model, UserMixin):
@@ -84,6 +85,7 @@ class Link(db.Model):
     title = db.Column(db.String(255), nullable=False)
     link = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(100), nullable=False)
+    pinned = db.Column(db.Boolean, default=False, server_default='false')
 
     # Relationship
     sheet = db.relationship('Sheet', back_populates='links')

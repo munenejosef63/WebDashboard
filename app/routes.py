@@ -330,16 +330,20 @@ def dashboard_section(section_name):
         ]
         logger.debug(f"Found {len(sections)} sections for navigation")
 
-        # Prepare links data
-        links = current_section.links
+        # Prepare links data - order by pinned status first, then by id
+        links = sorted(
+            current_section.links,
+            key=lambda x: (not x.pinned, x.id)
+        )
         logger.info(f"Section contains {len(links)} links")
         data = [{
             'id': link.id,
             'title': link.title,
             'url': link.link,
-            'status': link.status or 'unknown'
+            'status': link.status or 'unknown',
+            'pinned': link.pinned,
+            'description': link.description if hasattr(link, 'description') else None
         } for link in links]
-
 
         # Calculate stats
         last_upload = max(
@@ -501,6 +505,7 @@ def create_section():
                 "success": False,
                 "error": "Invalid spreadsheet ID format"
             }), 400
+
 
         # Verify spreadsheet ownership
         spreadsheet = Spreadsheet.query.filter_by(
@@ -888,4 +893,50 @@ def update_link():
         return jsonify({
             "status": "error",
             "message": "System error during update"
+        }), 500
+
+@main_bp.route('/toggle_pin/<int:link_id>', methods=['POST'])
+@login_required
+def toggle_pin(link_id):
+    """Toggle pinned status of a link with ownership verification"""
+    try:
+        # Verify link exists and belongs to current user
+        link = Link.query \
+            .join(Sheet) \
+            .join(Spreadsheet) \
+            .filter(
+                Link.id == link_id,
+                Spreadsheet.user_id == current_user.id
+            ).first()
+
+        if not link:
+            logger.warning(f"Link not found or access denied: {link_id}")
+            return jsonify({
+                "status": "error",
+                "message": "Link not found or access denied"
+            }), 404
+
+        # Toggle pinned status
+        link.pinned = not link.pinned
+        db.session.commit()
+        logger.info(f"Link pin toggled: ID {link_id}, new status: {link.pinned}")
+
+        return jsonify({
+            "status": "success",
+            "message": "Link pin status updated",
+            "pinned": link.pinned
+        }), 200
+
+    except SQLAlchemyError as e:
+        logger.error(f"Database error toggling pin: {str(e)}", exc_info=True)
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "message": "Database operation failed"
+        }), 500
+    except Exception as e:
+        logger.error(f"Unexpected error toggling pin: {str(e)}", exc_info=True)
+        return jsonify({
+            "status": "error",
+            "message": "System error toggling pin"
         }), 500

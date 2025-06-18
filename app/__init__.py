@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_session import Session
+from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from app.extensions import db, login_manager
 from app.config import config_options
@@ -34,6 +35,7 @@ def create_app(config_name='default'):
 
     # Initialize database
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     # Configure login manager
     login_manager.init_app(app)
