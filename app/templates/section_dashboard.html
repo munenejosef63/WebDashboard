@@ -302,6 +302,12 @@
             transform: translateY(0);
         }
 
+        .link-card.pinned {
+            order: -1;
+            border: 2px solid var(--warning-color);
+            box-shadow: 0 0 0 2px var(--warning-color);
+        }
+
         .link-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
@@ -422,11 +428,9 @@
             border-color: rgba(255, 255, 255, 0.5);
         }
 
-        /* Delete Button */
-        .delete-btn {
+        /* Action Buttons */
+        .action-btn {
             position: absolute;
-            top: 6px;
-            right: 6px;
             background: rgba(255, 255, 255, 0.9);
             border: none;
             width: 24px;
@@ -440,17 +444,40 @@
             opacity: 0;
             z-index: 3;
             font-size: 0.7rem;
-            color: var(--danger-color);
         }
 
-        .link-card:hover .delete-btn {
+        .link-card:hover .action-btn {
             opacity: 1;
+        }
+
+        .delete-btn {
+            top: 6px;
+            right: 6px;
+            color: var(--danger-color);
         }
 
         .delete-btn:hover {
             background: var(--danger-color);
             color: white;
             transform: scale(1.1);
+        }
+
+        .pin-btn {
+            top: 6px;
+            left: 6px;
+            color: var(--warning-color);
+        }
+
+        .pin-btn:hover {
+            background: var(--warning-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .pin-btn.pinned {
+            opacity: 1;
+            background: var(--warning-color);
+            color: white;
         }
 
         .empty-state {
@@ -698,13 +725,16 @@
                         <div class="links-grid" id="linksContainer">
                             {% for row in data %}
                             <div class="link-card {{ row.status }}" data-link-id="{{ row.id }}">
+                                <button class="action-btn pin-btn" title="Pin to Top" data-link-id="{{ row.id }}">
+                                    <i class="bi bi-pin-angle"></i>
+                                </button>
                                 <a href="{{ row.url }}" target="_blank" class="link-content">
                                     <div class="link-title">{{ row.title }}</div>
                                     {% if row.description %}
                                     <div class="link-description">{{ row.description }}</div>
                                     {% endif %}
                                 </a>
-                                <button class="delete-btn" title="Delete Link" data-link-id="{{ row.id }}">
+                                <button class="action-btn delete-btn" title="Delete Link" data-link-id="{{ row.id }}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -1047,12 +1077,41 @@
                     return;
                 }
 
+                // Handle pin button clicks
+                const pinBtn = e.target.closest('.pin-btn');
+                if (pinBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const linkCard = pinBtn.closest('.link-card');
+                    linkCard.classList.toggle('pinned');
+                    pinBtn.classList.toggle('pinned');
+
+                    // Move pinned cards to the top
+                    const container = document.getElementById('linksContainer');
+                    const pinnedCards = Array.from(container.querySelectorAll('.pinned'));
+                    const unpinnedCards = Array.from(container.querySelectorAll('.link-card:not(.pinned)'));
+
+                    // Clear container
+                    container.innerHTML = '';
+
+                    // Add pinned cards first
+                    pinnedCards.forEach(card => {
+                        container.appendChild(card);
+                    });
+
+                    // Add unpinned cards
+                    unpinnedCards.forEach(card => {
+                        container.appendChild(card);
+                    });
+                    return;
+                }
+
                 // Handle clicks on link content (let it behave normally)
                 if (e.target.closest('.link-content')) {
                     return;
                 }
 
-                // Handle clicks on the link card (but not delete button or content)
+                // Handle clicks on the link card (but not action buttons or content)
                 const linkCard = e.target.closest('.link-card');
                 if (linkCard) {
                     const link = linkCard.querySelector('.link-content');
@@ -1103,20 +1162,20 @@
                                         <div class="empty-icon">
                                             <i class="bi bi-link-45deg"></i>
                                         </div>
-                                        <p>No links found in this section. Add some using the New Link button!</p>
+                                                                                <p>No links found in this section. Add some using the New Link button!</p>
                                     `;
-                                    document.getElementById('linksContainer').appendChild(emptyState);
+                                    document.querySelector('.scrollable-content').appendChild(emptyState);
                                 }
-
-                                showToast('Link deleted successfully!', 'success');
                             }, 300);
                         }, 100);
+
+                        showToast('Link deleted successfully!', 'success');
                     } else {
-                        showToast(result.message || 'Failed to delete link', 'error');
+                        showToast('Error: ' + result.message, 'error');
                     }
                 } catch (error) {
-                    console.error('Delete error:', error);
-                    showToast('Failed to delete link. Please try again.', 'error');
+                    console.error('Error:', error);
+                    showToast('An error occurred. Please try again.', 'error');
                 } finally {
                     currentLinkToDelete = null;
                 }
@@ -1128,60 +1187,56 @@
                 currentLinkToDelete = null;
             });
 
-            // Add animation to cards on page load
-            const cards = document.querySelectorAll('.link-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-
-            // Enhanced Toast Notification
+            // Toast notification function
             function showToast(message, type) {
-                // Create toast container if it doesn't exist
-                let toastContainer = document.querySelector('.toast-container');
-                if (!toastContainer) {
-                    toastContainer = document.createElement('div');
-                    toastContainer.className = 'toast-container position-fixed top-20 end-0 p-3';
-                    toastContainer.style.zIndex = '9999';
-                    document.body.appendChild(toastContainer);
-                }
-
-                // Create toast element
                 const toast = document.createElement('div');
-                toast.className = `toast show align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0`;
-                toast.setAttribute('role', 'alert');
-                toast.setAttribute('aria-live', 'assertive');
-                toast.setAttribute('aria-atomic', 'true');
-                toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                toast.className = `toast-notification ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
 
-                // Icon based on type
-                const icon = type === 'success' ?
-                    '<i class="bi bi-check-circle-fill me-2"></i>' :
-                    '<i class="bi bi-exclamation-circle-fill me-2"></i>';
-
-                toast.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <div class="toast-icon fs-4">${icon}</div>
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-3" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                `;
-
-                toastContainer.appendChild(toast);
-
-                // Auto remove toast after 3 seconds
                 setTimeout(() => {
-                    toast.style.transition = 'opacity 0.5s';
-                    toast.style.opacity = '0';
-                    setTimeout(() => toast.remove(), 500);
+                    toast.classList.add('show');
+                }, 10);
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
                 }, 3000);
+            }
+
+            // Add toast styles if they don't exist
+            if (!document.querySelector('style#toast-styles')) {
+                const toastStyles = document.createElement('style');
+                toastStyles.id = 'toast-styles';
+                toastStyles.textContent = `
+                    .toast-notification {
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        color: white;
+                        font-weight: 500;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        transform: translateY(100px);
+                        opacity: 0;
+                        transition: all 0.3s ease;
+                        z-index: 10000;
+                    }
+                    .toast-notification.show {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                    .toast-notification.success {
+                        background-color: var(--success-color);
+                    }
+                    .toast-notification.error {
+                        background-color: var(--danger-color);
+                    }
+                `;
+                document.head.appendChild(toastStyles);
             }
         });
     </script>
