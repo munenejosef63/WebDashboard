@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.extensions import db
 from app.models import User
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
+from datetime import timedelta
 import logging
 
 # Initialize logger
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Create a blueprint for authentication routes
 auth_bp = Blueprint('auth', __name__)
+
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -35,6 +37,10 @@ def login():
 
             # Verify user credentials
             if user and user.check_password(password):
+                # Set session to permanent and configure timeout
+                session.permanent = True
+                session_timeout = timedelta(minutes=15)  # 15 minute session timeout
+
                 login_user(user)
                 logger.info(f"Login successful for user: {username}")
                 flash("Login successful!", "success")
@@ -54,6 +60,7 @@ def login():
 
     return render_template('login.html')
 
+
 @auth_bp.route('/logout')
 @login_required
 def logout():
@@ -70,3 +77,27 @@ def logout():
         flash("An error occurred while logging out. Please try again.", "danger")
 
     return redirect(url_for('auth.login'))
+
+
+@auth_bp.route('/extend_session', methods=['POST'])
+@login_required
+def extend_session():
+    """
+    Extends the current user's session by resetting the timeout.
+    Called via AJAX from the session timeout warning modal.
+    """
+    try:
+        # Reset the session lifetime
+        session.permanent = True
+        session_timeout = timedelta(minutes=15)  # Reset to 15 minutes
+
+        # For Flask-Login users, this will refresh the session
+        if current_user.is_authenticated:
+            login_user(current_user, remember=True)
+
+        logger.info(f"Session extended for user: {current_user.username}")
+        return jsonify({'status': 'success', 'message': 'Session extended'})
+
+    except Exception as e:
+        logger.error(f"Error extending session for user {current_user.username}: {e}", exc_info=True)
+        return jsonify({'status': 'error', 'message': 'Failed to extend session'}), 500
