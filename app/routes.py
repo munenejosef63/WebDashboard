@@ -579,7 +579,7 @@ def get_status_options():
         logger.error(f"Error loading status options: {str(e)}", exc_info=True)
         return jsonify({"error": "Failed to load status options"}), 500
 
-@main_bp.route('/delete_link/<int:link_id>', methods=['DELETE'])
+@main_bp.route('/delete_link/<int:link_id>', methods=['POST'])
 @login_required
 def delete_link(link_id):
     """Delete a link with ownership verification"""
