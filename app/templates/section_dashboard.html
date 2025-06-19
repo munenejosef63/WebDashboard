@@ -370,8 +370,14 @@
             hyphens: auto;
         }
 
+        /* New style for pinned link titles */
+        .link-card.pinned .link-title {
+            color: var(--warning-color);
+            font-weight: 700;
+        }
+
         .link-card:hover .link-title {
-            color: var(--white);
+            color: var(--orange) !important;
         }
 
         .link-description {
@@ -1119,44 +1125,55 @@
                             return 0; // maintain original order for equal pinned status
                         });
 
-                        // Re-append sorted cards
+                                                // Re-append cards in new order
                         cards.forEach(card => container.appendChild(card));
                     }
+
+                    showToast(newPinState ? 'Link pinned to top!' : 'Link unpinned', 'success');
                 } else {
                     showToast('Error: ' + result.message, 'error');
+                    // Revert UI changes if the operation failed
+                    linkCard.classList.toggle('pinned', !newPinState);
+                    pinBtn.classList.toggle('pinned', !newPinState);
                 }
             } catch (error) {
-                console.error('Error toggling pin:', error);
-                showToast('Failed to update pin status', 'error');
+                console.error('Error:', error);
+                showToast('Failed to update pin status. Please try again.', 'error');
+                // Revert UI changes if the operation failed
+                linkCard.classList.toggle('pinned', !newPinState);
+                pinBtn.classList.toggle('pinned', !newPinState);
             }
         }
 
-        // Event delegation for link cards
+        // Handle pin button clicks
         document.addEventListener('click', function(e) {
-            // Handle delete button clicks
-            const deleteBtn = e.target.closest('.delete-btn');
-            if (deleteBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const linkId = deleteBtn.dataset.linkId;
-                const linkCard = deleteBtn.closest('.link-card');
-                        currentLinkToDelete = linkId;
-                confirmationModal.classList.add('active');
-            }
-
-            // Handle pin button clicks
-            const pinBtn = e.target.closest('.pin-btn');
-            if (pinBtn) {
-                e.preventDefault();
-                e.stopPropagation();
+            if (e.target.closest('.pin-btn')) {
+                const pinBtn = e.target.closest('.pin-btn');
                 const linkId = pinBtn.dataset.linkId;
                 const linkCard = pinBtn.closest('.link-card');
-                const currentPinState = linkCard.classList.contains('pinned');
-                togglePinStatus(linkId, !currentPinState, linkCard, pinBtn);
+                const isCurrentlyPinned = linkCard.classList.contains('pinned');
+
+                // Toggle the pin state
+                togglePinStatus(linkId, !isCurrentlyPinned, linkCard, pinBtn);
             }
         });
 
-        // Confirm delete button
+        // Handle delete button clicks
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-btn')) {
+                const deleteBtn = e.target.closest('.delete-btn');
+                currentLinkToDelete = deleteBtn.dataset.linkId;
+                confirmationModal.classList.add('active');
+            }
+        });
+
+        // Cancel delete
+        cancelDelete.addEventListener('click', function() {
+            confirmationModal.classList.remove('active');
+            currentLinkToDelete = null;
+        });
+
+        // Confirm delete
         confirmDelete.addEventListener('click', async function() {
             if (!currentLinkToDelete) return;
 
@@ -1176,53 +1193,65 @@
 
                 if (result.status === 'success') {
                     showToast('Link deleted successfully!', 'success');
-                    document.querySelector(`.link-card[data-link-id="${currentLinkToDelete}"]`).remove();
+                    // Remove the card from the UI
+                    const cardToRemove = document.querySelector(`.link-card[data-link-id="${currentLinkToDelete}"]`);
+                    if (cardToRemove) {
+                        cardToRemove.remove();
+                    }
 
                     // Check if we have any links left
-                    if (document.querySelectorAll('.link-card').length === 0) {
+                    const linksContainer = document.getElementById('linksContainer');
+                    if (linksContainer && linksContainer.children.length === 0) {
+                        // Show empty state
                         window.location.reload();
                     }
                 } else {
                     showToast('Error: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('Error deleting link:', error);
-                showToast('Failed to delete link', 'error');
+                console.error('Error:', error);
+                showToast('Failed to delete link. Please try again.', 'error');
             } finally {
                 confirmationModal.classList.remove('active');
                 currentLinkToDelete = null;
             }
         });
 
-        // Cancel delete button
-        cancelDelete.addEventListener('click', function() {
-            confirmationModal.classList.remove('active');
-            currentLinkToDelete = null;
-        });
-
         // Toast notification function
         function showToast(message, type) {
+            // Remove any existing toasts
+            const existingToast = document.getElementById('customToast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Create toast element
             const toast = document.createElement('div');
-            toast.className = `toast-notification ${type}`;
+            toast.id = 'customToast';
+            toast.className = `custom-toast ${type}`;
             toast.textContent = message;
+
+            // Add to DOM
             document.body.appendChild(toast);
 
+            // Show toast
             setTimeout(() => {
                 toast.classList.add('show');
             }, 10);
 
+            // Hide after 3 seconds
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => {
-                    document.body.removeChild(toast);
+                    toast.remove();
                 }, 300);
             }, 3000);
         }
 
-        // Add some CSS for the toast notifications
-        const toastStyle = document.createElement('style');
-        toastStyle.textContent = `
-            .toast-notification {
+        // Add some CSS for the toast
+        const toastStyles = document.createElement('style');
+        toastStyles.textContent = `
+            .custom-toast {
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
@@ -1234,20 +1263,20 @@
                 transform: translateY(100px);
                 opacity: 0;
                 transition: all 0.3s ease;
-                z-index: 10000;
+                z-index: 9999;
             }
-            .toast-notification.show {
+            .custom-toast.show {
                 transform: translateY(0);
                 opacity: 1;
             }
-            .toast-notification.success {
-                background: var(--success-color);
+            .custom-toast.success {
+                background-color: var(--success-color);
             }
-            .toast-notification.error {
-                background: var(--danger-color);
+            .custom-toast.error {
+                background-color: var(--danger-color);
             }
         `;
-        document.head.appendChild(toastStyle);
+        document.head.appendChild(toastStyles);
     });
     </script>
 </body>
